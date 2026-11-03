@@ -40,14 +40,14 @@ function speak(word,options={}){
 }
 const feedbackMessages={
  correct:[{feedback:"Super!",label:"🌟 SUPER!"},{feedback:"Sehr gut!",label:"⭐ VÝBORNĚ!"},{feedback:"Prima gemacht!",label:"🎉 SKVĚLÁ PRÁCE!"},{feedback:"Richtig!",label:"✅ SPRÁVNĚ!"}],
- wrong:[{feedback:"Versuch es noch mal!",label:"💛 ZKUS TO ZNOVU!"},{feedback:"Fast! Versuch es noch einmal!",label:"🌈 SKORO! ZKUS TO JEŠTĚ JEDNOU!"}]
+ wrong:[{feedback:"Noch mal!",label:"💛 ZKUS TO ZNOVU!"},{feedback:"Nicht ganz!",label:"🌈 TO JEŠTĚ NENÍ ONO!"}]
 };
 let previousFeedback={correct:-1,wrong:-1};
-function giveFeedback(correct){
+function giveFeedback(correct,options={}){
  const kind=correct?"correct":"wrong",choices=feedbackMessages[kind];let index=Math.floor(Math.random()*choices.length);
  if(choices.length>1&&index===previousFeedback[kind])index=(index+1+Math.floor(Math.random()*(choices.length-1)))%choices.length;
  previousFeedback[kind]=index;const chosen=choices[index];
- el("message").textContent=chosen.label;speak(chosen.feedback,{once:true});
+ el("message").textContent=chosen.label;speak(chosen.feedback,{once:true,onEnd:options.onEnd});
 }
 function display(id){for(const name of ["home","game","finish","rhymes"])el(name).classList.toggle("hide",name!==id)}
 function topicsUI(){const area=el("topics");area.replaceChildren();topics.forEach((t,i)=>{const b=document.createElement("button");b.className="topic";const pic=document.createElement("span");pic.className="picture";pic.textContent=t.icon;const label=document.createElement("span");label.textContent=t.title;b.append(pic,label);b.addEventListener("click",()=>start(i));area.appendChild(b)})}
@@ -67,12 +67,12 @@ function startMemory(){el("sceneCanvas").classList.add("hide");el("choices").cla
 }
 function flipCard(i,b){
  const card=memoryCards[i];if(lockMemory||card.matched||card.open)return;
- card.open=true;b.textContent=card.word[1];b.classList.remove("faceDown");speak(card.word[0]);
- if(firstCard===null){firstCard=i;return}
+ card.open=true;b.textContent=card.word[1];b.classList.remove("faceDown");
+ if(firstCard===null){speak(card.word[0]);firstCard=i;return}
  const previous=memoryCards[firstCard];const previousButton=el("choices").children[firstCard];
  if(previous.id===card.id){card.matched=true;previous.matched=true;b.classList.add("matched");previousButton.classList.add("matched");pairsFound++;el("count").textContent=pairsFound+" / 4";el("stars").textContent="⭐ "+pairsFound;el("bar").style.width=pairsFound*25+"%";firstCard=null;
- giveFeedback(true);if(pairsFound===4){el("next").textContent="🏆 HOTOVO";el("next").classList.remove("hide")}}
- else{lockMemory=true;giveFeedback(false);const oldIndex=firstCard;firstCard=null;setTimeout(()=>{if(mode!=="memory"||el("game").classList.contains("hide"))return;card.open=false;previous.open=false;b.textContent="❓";previousButton.textContent="❓";b.classList.add("faceDown");previousButton.classList.add("faceDown");lockMemory=false},2000)}
+ speak(card.word[0],{once:true,onEnd:()=>giveFeedback(true)});if(pairsFound===4){el("next").textContent="🏆 HOTOVO";el("next").classList.remove("hide")}}
+ else{lockMemory=true;firstCard=null;const hidePair=()=>{if(mode!=="memory"||el("game").classList.contains("hide"))return;card.open=false;previous.open=false;b.textContent="❓";previousButton.textContent="❓";b.classList.add("faceDown");previousButton.classList.add("faceDown");lockMemory=false};speak(card.word[0],{once:true,onEnd:()=>giveFeedback(false,{onEnd:()=>setTimeout(hidePair,700)})});setTimeout(()=>{if(lockMemory&&card.open&&previous.open)hidePair()},6500)}
 }
 let sceneStep=0,sceneItems=[],sceneScore=0,sceneDone=false;
 const sceneLayouts=[
