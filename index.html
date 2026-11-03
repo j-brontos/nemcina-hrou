@@ -3,7 +3,7 @@
 <style>
 *{box-sizing:border-box}body{margin:0;background:#eef5ff;color:#22345c;font-family:system-ui,-apple-system,sans-serif;text-transform:uppercase}button{font:inherit;cursor:pointer;touch-action:manipulation;border:0}button:focus-visible{outline:4px solid #ffba31;outline-offset:3px}.app{max-width:900px;margin:auto;padding:14px 14px 35px}.hero{background:linear-gradient(120deg,#5065d9,#9763cb);border-radius:28px;color:white;text-align:center;padding:22px 12px;margin-bottom:16px}.hero h1{font-size:clamp(25px,5vw,39px);margin:0}.hero p{margin:8px 0 0;font-weight:700}.panel{background:white;border-radius:26px;padding:20px;margin-bottom:14px;box-shadow:0 5px 22px #344a7314}h2{text-align:center;font-size:clamp(21px,4vw,30px);margin:4px 0 18px}.topics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.topic{background:#f0f3ff;border:3px solid #dce3ff;border-radius:24px;min-height:145px;padding:14px 7px;color:#283b68;font-size:clamp(15px,3.5vw,21px);font-weight:900}.topic .picture{display:block;font-size:clamp(39px,9vw,62px);line-height:1.3;margin-bottom:8px}.gameTop{display:flex;justify-content:space-between;align-items:center;gap:10px}.pill{border-radius:50px;background:#eef1ff;padding:12px 17px;color:#354fa3;font-weight:900}.back{background:#e8ecff;border-radius:50px;padding:12px 18px;font-weight:900;color:#314f9d}.speaker{display:block;margin:12px auto 16px;width:min(100%,350px);min-height:145px;border-radius:28px;background:#ffe29c;color:#563a17;font-size:clamp(22px,5vw,32px);font-weight:900;box-shadow:0 7px 0 #e8bf66}.speaker .sound{display:block;font-size:64px}.speaker:active{transform:translateY(3px);box-shadow:0 4px 0 #e8bf66}.choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.choice{border-radius:26px;min-height:150px;background:#f5f7ff;border:4px solid #e1e8ff;font-size:clamp(66px,15vw,110px);display:flex;align-items:center;justify-content:center;line-height:1.2;padding:10px}.choice:active{transform:scale(.97)}.choice.correct{background:#d9f9e0;border-color:#4ac775}.choice.wrong{background:#ffe0e0;border-color:#ed7979}.choice[disabled]{cursor:default}.message{text-align:center;font-size:clamp(20px,5vw,30px);font-weight:900;min-height:45px;margin:16px 0}.next{display:block;width:100%;background:#5265d7;color:white;border-radius:20px;padding:18px;font-weight:900;font-size:23px}.hide{display:none!important}.help{text-align:center;font-size:15px;color:#5b6a84;font-weight:700;line-height:1.5}.finish{text-align:center}.finish .medal{font-size:100px}.finish p{font-size:25px;font-weight:900}.actions{display:flex;gap:10px;flex-wrap:wrap}.actions button{flex:1;min-width:120px}.toggle{display:flex;align-items:center;justify-content:center;gap:9px;margin:16px auto 2px;font-weight:800;font-size:15px}.toggle input{width:22px;height:22px}.progress{height:14px;background:#e6eafa;border-radius:20px;overflow:hidden;margin:18px 0}.progress>div{height:100%;background:#72d58d;transition:width .2s}footer{text-align:center;color:#667795;font-size:12px;font-weight:700;padding:15px}@media(min-width:650px){.topics{grid-template-columns:repeat(4,1fr)}.choices{grid-template-columns:repeat(4,1fr)}.choice{min-height:175px}}@media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style></head><body><main class="app"><header class="hero"><h1>🦕 NĚMČINA HROU 🇩🇪</h1><p>POSLOUCHEJ • KOUKEJ • HRAJ SI</p></header>
-<section id="home"><div class="panel"><h2>🎮 VYBER SI HRU</h2><div id="topics" class="topics"></div><label class="toggle"><input id="voice" type="checkbox" checked> 🔊 ZAPNOUT ZVUK</label><p class="help">KLEPNI NA OBRÁZEK. POSLECHNI SI NĚMECKÉ SLOVO A VYBER SPRÁVNÝ OBRÁZEK.</p></div></section>
+<section id="home"><div class="panel"><h2>🎮 VYBER SI HRU</h2><div id="topics" class="topics"></div><label class="toggle"><input id="voice" type="checkbox" checked> 🔊 ZAPNOUT ZVUK</label><p class="help">VYBER HRU, KLEPNI NA 🔊 A PAK NA SPRÁVNÝ OBRÁZEK. PRO PŘEHRÁVÁNÍ JE POTŘEBA INTERNET.</p></div></section>
 <section id="game" class="panel hide"><div class="gameTop"><button id="back" class="back" aria-label="ZPĚT">⬅️ ZPĚT</button><span id="count" class="pill">1 / 6</span><span id="stars" class="pill">⭐ 0</span></div><div class="progress"><div id="bar"></div></div><h2 id="heading"></h2><button id="listen" class="speaker"><span class="sound">🔊</span> KLEPNI A POSLOUCHEJ</button><div id="choices" class="choices"></div><div id="message" class="message" aria-live="polite"></div><button id="next" class="next hide">➡️ DÁL</button></section>
 <section id="finish" class="panel finish hide"><div class="medal">🏆</div><h2>SKVĚLÁ PRÁCE!</h2><p id="result"></p><div class="actions"><button id="retry" class="next">🔁 ZNOVU</button><button id="all" class="next">🏠 HRY</button></div></section><footer>UČENÍ NĚMČINY OBRÁZKY A ZVUKEM</footer></main>
 <script>
@@ -22,23 +22,40 @@ const topics=[
 const el=id=>document.getElementById(id);let topicIndex=0,round=[],step=0,score=0,done=false;
 function shuffled(items){const a=[...items];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 let speechToken=0;
+let audioPlayer=null;
+function fallbackVoice(word,lang,token){
+ if(token!==speechToken)return;
+ if(!("speechSynthesis" in window)||!("SpeechSynthesisUtterance" in window)){
+  el("message").textContent="🔇 ZVUK NENÍ DOSTUPNÝ";return;
+ }
+ try{
+  const engine=window.speechSynthesis;
+  engine.cancel();
+  if(engine.paused)engine.resume();
+  const u=new SpeechSynthesisUtterance(word);
+  u.lang=lang;u.rate=.85;u.volume=1;
+  const voices=engine.getVoices();
+  u.voice=voices.find(v=>v.lang.toLowerCase()==="de-de")||voices.find(v=>v.lang.toLowerCase().startsWith("de"))||null;
+  u.onerror=()=>{if(token===speechToken)el("message").textContent="🔇 ZVUK NELZE PŘEHRÁT"};
+  engine.speak(u);
+  if(engine.paused)engine.resume();
+ }catch(e){el("message").textContent="🔇 ZVUK NELZE PŘEHRÁT"}
+}
 function speak(word,lang="de-DE"){
  if(!el("voice").checked)return;
- if(!("speechSynthesis" in window)||!("SpeechSynthesisUtterance" in window)){el("message").textContent="🔇 PROHLÍŽEČ NEPODPORUJE HLAS";return}
- const engine=window.speechSynthesis;
  const token=++speechToken;
- // iOS Safari může zůstat v pozastaveném stavu.
- if(engine.paused)engine.resume();
- engine.cancel();
- const u=new SpeechSynthesisUtterance(word);
- u.lang=lang;u.rate=.85;u.pitch=1;u.volume=1;
- const voices=engine.getVoices();
- const german=voices.find(v=>v.lang.toLowerCase()==="de-de")||voices.find(v=>v.lang.toLowerCase().startsWith("de"));
- if(german)u.voice=german;
- u.onerror=function(){if(token===speechToken)el("message").textContent="🔇 ZKUS ZNOVU 🔊"};
- // Volej přímo při kliknutí; žádný timeout před spuštěním.
- engine.speak(u);
- if(engine.paused)engine.resume();
+ try{
+  if(audioPlayer){audioPlayer.pause();audioPlayer=null}
+  window.speechSynthesis?.cancel();
+  // Zvukový soubor místo samotné syntézy v prohlížeči.
+  const url="https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=de&q="+encodeURIComponent(word);
+  const player=new Audio(url);
+  audioPlayer=player;
+  player.preload="auto";
+  player.onerror=()=>fallbackVoice(word,lang,token);
+  const attempt=player.play();
+  if(attempt&&typeof attempt.catch==="function")attempt.catch(()=>fallbackVoice(word,lang,token));
+ }catch(e){fallbackVoice(word,lang,token)}
 }
 function display(id){for(const name of ["home","game","finish"])el(name).classList.toggle("hide",name!==id)}
 function topicsUI(){const area=el("topics");area.replaceChildren();topics.forEach((t,i)=>{const b=document.createElement("button");b.className="topic";const pic=document.createElement("span");pic.className="picture";pic.textContent=t.icon;const label=document.createElement("span");label.textContent=t.title;b.append(pic,label);b.addEventListener("click",()=>start(i));area.appendChild(b)})}
@@ -46,5 +63,5 @@ function start(i){topicIndex=i;round=shuffled(topics[i].items).slice(0,6);step=0
 function render(){done=false;const t=topics[topicIndex],correct=round[step];el("heading").textContent=t.icon+" "+t.title;el("count").textContent=(step+1)+" / "+round.length;el("stars").textContent="⭐ "+score;el("bar").style.width=(step/round.length*100)+"%";el("message").textContent="";el("next").classList.add("hide");const area=el("choices");area.replaceChildren();const options=shuffled([correct,...shuffled(t.items.filter(w=>w!==correct)).slice(0,3)]);options.forEach(w=>{const b=document.createElement("button");b.className="choice";b.textContent=w[1];b.setAttribute("aria-label","OBRÁZEK "+w[1]);b.addEventListener("click",()=>choose(b,w===correct,correct));area.appendChild(b)});/* Na iPhonu se zvuk spouští tlačítkem. */}
 function choose(button,right,correct){if(done)return;done=true;for(const b of el("choices").children)b.disabled=true;if(right){score++;button.classList.add("correct");el("message").textContent="🌟 BRAVO!";speak("Super!","de-DE")}else{button.classList.add("wrong");for(const b of el("choices").children)if(b.textContent===correct[1])b.classList.add("correct");el("message").textContent="💛 ZKUSÍME DALŠÍ!";speak(correct[0])}el("stars").textContent="⭐ "+score;el("next").textContent=step===round.length-1?"🏆 VÝSLEDEK":"➡️ DÁL";el("next").classList.remove("hide")}
 function next(){step++;if(step<round.length){render();return}el("bar").style.width="100%";try{const key="nemcina-hrou-"+topicIndex;localStorage.setItem(key,String(Math.max(score,Number(localStorage.getItem(key)||0))))}catch(e){}el("result").textContent="⭐ "+score+" / "+round.length;display("finish");speak("Sehr gut!")}
-el("listen").addEventListener("click",()=>{el("message").textContent="";speak(round[step][0])});el("next").addEventListener("click",next);el("back").addEventListener("click",()=>{window.speechSynthesis?.cancel();display("home")});el("retry").addEventListener("click",()=>start(topicIndex));el("all").addEventListener("click",()=>display("home"));topicsUI();
+el("listen").addEventListener("click",()=>{el("message").textContent="";speak(round[step][0])});el("next").addEventListener("click",next);el("back").addEventListener("click",()=>{if(audioPlayer)audioPlayer.pause();window.speechSynthesis?.cancel();display("home")});el("retry").addEventListener("click",()=>start(topicIndex));el("all").addEventListener("click",()=>display("home"));topicsUI();
 </script></body></html>
