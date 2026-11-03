@@ -30,6 +30,7 @@ jobs:
           source = pathlib.Path("index.html").read_text(encoding="utf-8")
           words = set(re.findall(r'\["([^"]+)","[^"]+"\]', source))
           words.update(["Super!", "Sehr gut!"])
+          words.update(re.findall(r'speech:"([^"]+)"', source))
           target = pathlib.Path("audio")
           target.mkdir(exist_ok=True)
           async def generate(word):
