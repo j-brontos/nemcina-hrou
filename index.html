@@ -38,6 +38,17 @@ function speak(word,options={}){
  }
  playOnce(twice?2:1);
 }
+const feedbackMessages={
+ correct:[{feedback:"Super!",label:"🌟 SUPER!"},{feedback:"Sehr gut!",label:"⭐ VÝBORNĚ!"},{feedback:"Prima gemacht!",label:"🎉 SKVĚLÁ PRÁCE!"},{feedback:"Richtig!",label:"✅ SPRÁVNĚ!"}],
+ wrong:[{feedback:"Versuch es noch mal!",label:"💛 ZKUS TO ZNOVU!"},{feedback:"Fast! Versuch es noch einmal!",label:"🌈 SKORO! ZKUS TO JEŠTĚ JEDNOU!"}]
+};
+let previousFeedback={correct:-1,wrong:-1};
+function giveFeedback(correct){
+ const kind=correct?"correct":"wrong",choices=feedbackMessages[kind];let index=Math.floor(Math.random()*choices.length);
+ if(choices.length>1&&index===previousFeedback[kind])index=(index+1+Math.floor(Math.random()*(choices.length-1)))%choices.length;
+ previousFeedback[kind]=index;const chosen=choices[index];
+ el("message").textContent=chosen.label;speak(chosen.feedback,{once:true});
+}
 function display(id){for(const name of ["home","game","finish","rhymes"])el(name).classList.toggle("hide",name!==id)}
 function topicsUI(){const area=el("topics");area.replaceChildren();topics.forEach((t,i)=>{const b=document.createElement("button");b.className="topic";const pic=document.createElement("span");pic.className="picture";pic.textContent=t.icon;const label=document.createElement("span");label.textContent=t.title;b.append(pic,label);b.addEventListener("click",()=>start(i));area.appendChild(b)})}
 function start(i){stopAudio();topicIndex=i;round=shuffled(topics[i].items).slice(0,6);step=0;score=0;display("game");if(mode==="memory")startMemory();else if(mode==="explore")renderExplore();else if(mode==="scene")startScene();else{render();speak(round[step][0])}}
@@ -60,8 +71,8 @@ function flipCard(i,b){
  if(firstCard===null){firstCard=i;return}
  const previous=memoryCards[firstCard];const previousButton=el("choices").children[firstCard];
  if(previous.id===card.id){card.matched=true;previous.matched=true;b.classList.add("matched");previousButton.classList.add("matched");pairsFound++;el("count").textContent=pairsFound+" / 4";el("stars").textContent="⭐ "+pairsFound;el("bar").style.width=pairsFound*25+"%";firstCard=null;
- if(pairsFound===4){el("message").textContent="🏆 VÝBORNĚ!";el("next").textContent="🏆 HOTOVO";el("next").classList.remove("hide")}}
- else{lockMemory=true;const oldIndex=firstCard;firstCard=null;setTimeout(()=>{if(mode!=="memory"||el("game").classList.contains("hide"))return;card.open=false;previous.open=false;b.textContent="❓";previousButton.textContent="❓";b.classList.add("faceDown");previousButton.classList.add("faceDown");lockMemory=false},2000)}
+ giveFeedback(true);if(pairsFound===4){el("next").textContent="🏆 HOTOVO";el("next").classList.remove("hide")}}
+ else{lockMemory=true;giveFeedback(false);const oldIndex=firstCard;firstCard=null;setTimeout(()=>{if(mode!=="memory"||el("game").classList.contains("hide"))return;card.open=false;previous.open=false;b.textContent="❓";previousButton.textContent="❓";b.classList.add("faceDown");previousButton.classList.add("faceDown");lockMemory=false},2000)}
 }
 let sceneStep=0,sceneItems=[],sceneScore=0,sceneDone=false;
 const sceneLayouts=[
@@ -92,11 +103,11 @@ function renderScene(rebuild=false){
 }
 function chooseScene(b,w){
  if(sceneDone)return;
- if(w===sceneItems[sceneStep]){sceneDone=true;sceneScore++;b.classList.add("correct");el("message").textContent="🌟 BRAVO!";el("stars").textContent="⭐ "+sceneScore;el("next").textContent=sceneStep===sceneItems.length-1?"🏆 VÝSLEDEK":"➡️ DÁL";el("next").classList.remove("hide")}
- else{b.classList.add("wrong");setTimeout(()=>b.classList.remove("wrong"),500)}
+ if(w===sceneItems[sceneStep]){sceneDone=true;sceneScore++;b.classList.add("correct");giveFeedback(true);el("stars").textContent="⭐ "+sceneScore;el("next").textContent=sceneStep===sceneItems.length-1?"🏆 VÝSLEDEK":"➡️ DÁL";el("next").classList.remove("hide")}
+ else{b.classList.add("wrong");giveFeedback(false);setTimeout(()=>b.classList.remove("wrong"),500)}
 }
 function nextScene(){sceneStep++;if(sceneStep<sceneItems.length){renderScene(false)}else{score=sceneScore;finishGame(sceneItems.length)}}
-function choose(button,right,correct){if(done)return;done=true;for(const b of el("choices").children)b.disabled=true;if(right){score++;button.classList.add("correct");el("message").textContent="🌟 BRAVO!";speak("Super!","de-DE")}else{button.classList.add("wrong");for(const b of el("choices").children)if(b.textContent===correct[1])b.classList.add("correct");el("message").textContent="💛 ZKUSÍME DALŠÍ!";speak(correct[0])}el("stars").textContent="⭐ "+score;el("next").textContent=step===round.length-1?"🏆 VÝSLEDEK":"➡️ DÁL";el("next").classList.remove("hide")}
+function choose(button,right,correct){if(done)return;done=true;for(const b of el("choices").children)b.disabled=true;if(right){score++;button.classList.add("correct");giveFeedback(true)}else{button.classList.add("wrong");for(const b of el("choices").children)if(b.textContent===correct[1])b.classList.add("correct");giveFeedback(false)}el("stars").textContent="⭐ "+score;el("next").textContent=step===round.length-1?"🏆 VÝSLEDEK":"➡️ DÁL";el("next").classList.remove("hide")}
 function next(){if(mode==="scene"){nextScene();return}if(mode==="memory"){score=pairsFound;finishGame(4);return}step++;if(step<round.length){render();speak(round[step][0]);return}el("bar").style.width="100%";try{const key="nemcina-hrou-"+topicIndex;localStorage.setItem(key,String(Math.max(score,Number(localStorage.getItem(key)||0))))}catch(e){}el("result").textContent="⭐ "+score+" / "+round.length;display("finish");speak("Sehr gut!")}
 document.querySelectorAll(".mode").forEach(b=>b.addEventListener("click",()=>{mode=b.dataset.mode;document.querySelectorAll(".mode").forEach(x=>x.classList.toggle("active",x===b));el("home").querySelector(".help").textContent=mode==="memory"?"OTÁČEJ KARTY A NAJDI STEJNÉ OBRÁZKY.":mode==="explore"?"KLEPNI NA OBRÁZEK A POSLOUCHEJ NĚMECKÉ SLOVO.":"VYBER HRU, KLEPNI NA 🔊 A PAK NA SPRÁVNÝ OBRÁZEK."}));
 function finishGame(total){el("result").textContent="⭐ "+score+" / "+total;display("finish");speak("Sehr gut!")}
