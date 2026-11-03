@@ -32,6 +32,7 @@ jobs:
           words = set(re.findall(r'\["([^"]+)","[^"]+"\]', source))
           words.update(["Super!", "Sehr gut!"])
           words.update(re.findall(r'speech:"([^"]+)"', source))
+          words.update(re.findall(r'feedback:"([^"]+)"', source))
           # Rhyme lines are individually playable; extract the lines arrays only.
           rhyme_blocks = re.findall(r'lines:\[([^\]]+)\]', source)
           for block in rhyme_blocks:
