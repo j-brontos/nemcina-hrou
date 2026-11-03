@@ -19,6 +19,26 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Install offline German speech generator
+        run: sudo apt-get update && sudo apt-get install -y espeak ffmpeg
+      - name: Generate German MP3 files
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import pathlib, re, subprocess, tempfile, urllib.parse
+          source = pathlib.Path("index.html").read_text(encoding="utf-8")
+          words = set(re.findall(r'\["([^"]+)","[^"]+"\]', source))
+          words.update(["Super!", "Sehr gut!"])
+          target = pathlib.Path("audio")
+          target.mkdir(exist_ok=True)
+          for word in sorted(words):
+              filename = urllib.parse.quote(word, safe="").replace("%", "_") + ".mp3"
+              with tempfile.TemporaryDirectory() as tmp:
+                  wav = pathlib.Path(tmp) / "voice.wav"
+                  subprocess.run(["espeak", "-v", "de", "-s", "135", "-w", str(wav), word], check=True)
+                  subprocess.run(["ffmpeg", "-nostdin", "-loglevel", "error", "-y", "-i", str(wav), "-codec:a", "libmp3lame", "-qscale:a", "5", str(target / filename)], check=True)
+          print(f"Generated {len(words)} German audio files")
+          PY
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload site
