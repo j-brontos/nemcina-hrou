@@ -61,7 +61,7 @@ function flipCard(i,b){
  const previous=memoryCards[firstCard];const previousButton=el("choices").children[firstCard];
  if(previous.id===card.id){card.matched=true;previous.matched=true;b.classList.add("matched");previousButton.classList.add("matched");pairsFound++;el("count").textContent=pairsFound+" / 4";el("stars").textContent="⭐ "+pairsFound;el("bar").style.width=pairsFound*25+"%";firstCard=null;
  if(pairsFound===4){el("message").textContent="🏆 VÝBORNĚ!";el("next").textContent="🏆 HOTOVO";el("next").classList.remove("hide")}}
- else{lockMemory=true;const oldIndex=firstCard;firstCard=null;setTimeout(()=>{if(mode!=="memory"||el("game").classList.contains("hide"))return;card.open=false;previous.open=false;b.textContent="❓";previousButton.textContent="❓";b.classList.add("faceDown");previousButton.classList.add("faceDown");lockMemory=false},950)}
+ else{lockMemory=true;const oldIndex=firstCard;firstCard=null;setTimeout(()=>{if(mode!=="memory"||el("game").classList.contains("hide"))return;card.open=false;previous.open=false;b.textContent="❓";previousButton.textContent="❓";b.classList.add("faceDown");previousButton.classList.add("faceDown");lockMemory=false},2000)}
 }
 let sceneStep=0,sceneItems=[],sceneScore=0,sceneDone=false;
 const sceneLayouts=[
