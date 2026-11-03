@@ -1,4 +1,5 @@
 name: Publish German learning app
+# Redeploy requested after recent game updates.
 on:
   push:
     branches: [main]
