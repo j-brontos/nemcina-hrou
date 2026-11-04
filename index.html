@@ -39,7 +39,7 @@ let speechToken=0;
 let audioPlayer=null,repeatTimer=null,playbackToken=0;
 function stopAudio(){playbackToken++;if(repeatTimer){clearTimeout(repeatTimer);repeatTimer=null}if(audioPlayer){audioPlayer.pause();audioPlayer.onended=null;audioPlayer=null}}
 function audioFile(word){return "audio/"+encodeURIComponent(word).replace(/[!'()*]/g,c=>"%"+c.charCodeAt(0).toString(16).toUpperCase()).replace(/%/g,"_")+".mp3"}
-let audioBusy=false;
+let audioBusy=false,wrongAnswerWatchdog=null;
 function showWord(word){if(el("game").classList.contains("hide"))return;el("spokenWords").textContent=word.toLocaleUpperCase("de-DE");el("spokenText").classList.remove("hide")}
 function speak(word,options={}){
  stopAudio();const token=playbackToken;
@@ -59,7 +59,20 @@ function speak(word,options={}){
 function playWrong(word,options={}){
  if(audioBusy)return;
  audioBusy=true;
- speak(word,{once:true,onEnd:()=>{repeatTimer=setTimeout(()=>giveFeedback(false,{onEnd:()=>{audioBusy=false;if(options.onEnd)options.onEnd()}}),300)}});
+ // A missing or interrupted MP3 must never lock the child's answers indefinitely.
+ let completed=false;
+ const release=()=>{
+  if(completed)return;
+  completed=true;clearTimeout(wrongAnswerWatchdog);wrongAnswerWatchdog=null;
+  audioBusy=false;if(options.onEnd)options.onEnd();
+ };
+ clearTimeout(wrongAnswerWatchdog);
+ wrongAnswerWatchdog=setTimeout(()=>{stopAudio();release()},4500);
+ speak(word,{once:true,onEnd:()=>{
+  repeatTimer=setTimeout(()=>{
+   giveFeedback(false,{onEnd:release});
+  },300);
+ }});
 }
 const gameInstructions={
  placement:"Poslouchej a přesuň správný obrázek na správné místo.",
@@ -81,7 +94,7 @@ function giveFeedback(correct,options={}){
  previousFeedback[kind]=index;const chosen=choices[index];
  el("message").textContent=chosen.label;speak(chosen.feedback,{once:true,showWord:false,onEnd:options.onEnd});
 }
-function display(id){stopAudio();audioBusy=false;if(id!=="game")el("spokenText").classList.add("hide");for(const name of ["home","game","finish","rhymes"])el(name).classList.toggle("hide",name!==id);if(id!=="game"){el("positionBoard").classList.add("hide");el("placementArea").classList.add("hide")}}
+function display(id){clearTimeout(wrongAnswerWatchdog);wrongAnswerWatchdog=null;stopAudio();audioBusy=false;placementLocked=false;if(id!=="game")el("spokenText").classList.add("hide");for(const name of ["home","game","finish","rhymes"])el(name).classList.toggle("hide",name!==id);if(id!=="game"){el("positionBoard").classList.add("hide");el("placementArea").classList.add("hide")}}
 function itemsForTopic(i){return difficulty===2?levelTwoItems[i]:topics[i].items}
 function pictureMarkup(word){
  const text=word[0].toLocaleLowerCase("de-DE"),emoji=word[1];
@@ -278,7 +291,7 @@ el("level1").addEventListener("click",()=>setDifficulty(1));
 el("level2").addEventListener("click",()=>setDifficulty(2));
 document.querySelectorAll(".mode").forEach(b=>b.addEventListener("click",()=>{mode=b.dataset.mode;stopAudio();playInstructions();const positions=mode==="position"||mode==="placement";el("positionStart").classList.toggle("hide",!positions);el("topics").classList.toggle("hide",positions);el("topicsHeading").classList.toggle("hide",positions);document.querySelectorAll(".mode").forEach(x=>x.classList.toggle("active",x===b));el("home").querySelector(".help").textContent=mode==="placement"?"PŘESUŇ OBRÁZEK NA SPRÁVNÉ MÍSTO.":mode==="position"?"POSLOUCHEJ A UKAŽ, KDE JE JABLKO, KLOBOUK NEBO ZVÍŘÁTKO.":mode==="memory"?"OTÁČEJ KARTY A NAJDI STEJNÉ OBRÁZKY.":mode==="explore"?"KLEPNI NA OBRÁZEK A POSLOUCHEJ NĚMECKÉ SLOVO.":"VYBER HRU, KLEPNI NA 🔊 A PAK NA SPRÁVNÝ OBRÁZEK."}));
 function finishGame(total){el("result").textContent="⭐ "+score+" / "+total;display("finish");speak("Sehr gut!")}
-el("listen").addEventListener("click",()=>{el("message").textContent="";speak(mode==="placement"?placementSpeech():mode==="position"?positionSpeech():mode==="scene"?sceneItems[sceneStep][0]:round[step][0])});el("next").addEventListener("click",next);el("back").addEventListener("click",()=>{stopAudio();display("home")});el("retry").addEventListener("click",()=>start(topicIndex));el("all").addEventListener("click",()=>{stopAudio();display("home")});const rhymes=[
+el("listen").addEventListener("click",()=>{clearTimeout(wrongAnswerWatchdog);wrongAnswerWatchdog=null;audioBusy=false;placementLocked=false;el("message").textContent="";speak(mode==="placement"?placementSpeech():mode==="position"?positionSpeech():mode==="scene"?sceneItems[sceneStep][0]:round[step][0])});el("next").addEventListener("click",next);el("back").addEventListener("click",()=>{stopAudio();display("home")});el("retry").addEventListener("click",()=>start(topicIndex));el("all").addEventListener("click",()=>{stopAudio();display("home")});const rhymes=[
  {icon:"🌈",title:"REGENBOGEN",lines:["REGEN, REGEN, KOMM HERBEI,","SONNE SCHEINT, DER HIMMEL FREI.","ROT UND GELB UND GRÜN UND BLAU,","EIN REGENBOGEN – SCHAU, SCHAU, SCHAU!"],speech:"Regen, Regen, komm herbei. Sonne scheint, der Himmel frei. Rot und gelb und grün und blau. Ein Regenbogen, schau, schau, schau!"},
  {icon:"🍂",title:"BUNTE BLÄTTER",lines:["BUNTE BLÄTTER, ROT UND GELB,","FLIEGEN LEISE DURCH DIE WELT.","EINS, ZWEI, DREI – SCHAU MAL HER,","DER WIND BLÄST SIE HIN UND HER!"],speech:"Bunte Blätter, rot und gelb. Fliegen leise durch die Welt. Eins, zwei, drei, schau mal her. Der Wind bläst sie hin und her!"},
  {icon:"☔",title:"REGENSCHIRM",lines:["ES REGNET, ES REGNET,","ICH NEHME MEINEN SCHIRM.","ICH NEHME MEINE GUMMISTIEFEL,","UND SPRINGE IN DIE PFÜTZEN!"],speech:"Es regnet, es regnet. Ich nehme meinen Schirm. Ich nehme meine Gummistiefel. Und springe in die Pfützen!"},
