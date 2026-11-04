@@ -65,7 +65,9 @@ function currentTaskSpeech(){
  if(mode==="quiz")return round[step]?.[0]||"";
  return "";
 }
-let errorToneContext=null;
+let errorToneContext=null,activeWrongHighlight=null;
+function clearWrongHighlight(){if(activeWrongHighlight){activeWrongHighlight.classList.remove("wrong");activeWrongHighlight=null}}
+function markWrongHighlight(element){clearWrongHighlight();if(element){element.classList.add("wrong");activeWrongHighlight=element}}
 function playErrorTone(onEnd){
  // A short, descending negative tone, synthesized locally (no MP3 needed).
  const token=playbackToken;
@@ -96,6 +98,7 @@ function playWrong(word,options={}){
  stopAudio();audioBusy=false;
  let sequenceToken=playbackToken;
  const task=currentTaskSpeech();
+ if(options.highlight)markWrongHighlight(options.highlight);
  const wrongChoices=feedbackMessages.wrong;
  let index=Math.floor(Math.random()*wrongChoices.length);
  if(wrongChoices.length>1&&index===previousFeedback.wrong)index=(index+1)%wrongChoices.length;
@@ -105,6 +108,7 @@ function playWrong(word,options={}){
  el("message").textContent=feedback.label;
  const replayTask=()=>{
   if(!active())return;
+  clearWrongHighlight();
   if(task&&mode!=="memory"){showWord(task);speak(task,{once:true,quick:true});sequenceToken=playbackToken}
   else if(word)showWord(word);
  };
@@ -142,7 +146,7 @@ function giveFeedback(correct,options={}){
  previousFeedback[kind]=index;const chosen=choices[index];
  el("message").textContent=chosen.label;speak(chosen.feedback,{once:true,showWord:false,onEnd:options.onEnd});
 }
-function display(id){cancelAdvance();clearTimeout(wrongAnswerWatchdog);wrongAnswerWatchdog=null;stopAudio();audioBusy=false;placementLocked=false;if(id!=="game")el("spokenText").classList.add("hide");for(const name of ["home","game","finish","rhymes"])el(name).classList.toggle("hide",name!==id);if(id!=="game"){el("positionBoard").classList.add("hide");el("placementArea").classList.add("hide")}}
+function display(id){clearWrongHighlight();cancelAdvance();clearTimeout(wrongAnswerWatchdog);wrongAnswerWatchdog=null;stopAudio();audioBusy=false;placementLocked=false;if(id!=="game")el("spokenText").classList.add("hide");for(const name of ["home","game","finish","rhymes"])el(name).classList.toggle("hide",name!==id);if(id!=="game"){el("positionBoard").classList.add("hide");el("placementArea").classList.add("hide")}}
 function itemsForTopic(i){return difficulty===2?levelTwoItems[i]:topics[i].items}
 function pictureMarkup(word){
  const text=word[0].toLocaleLowerCase("de-DE"),emoji=word[1];
@@ -163,7 +167,7 @@ function pictureMarkup(word){
 }
 function paintPicture(button,word){if(difficulty===2)button.innerHTML=pictureMarkup(word);else button.textContent=word[1]}
 function topicsUI(){const area=el("topics");area.replaceChildren();topics.forEach((t,i)=>{const b=document.createElement("button");b.className="topic";const pic=document.createElement("span");pic.className="picture";pic.textContent=t.icon;const label=document.createElement("span");label.textContent=t.title;b.append(pic,label);b.addEventListener("click",()=>start(i));area.appendChild(b)})}
-function start(i){cancelAdvance();stopAudio();audioBusy=false;topicIndex=i;round=shuffled(itemsForTopic(i)).slice(0,6);step=0;score=0;display("game");if(mode==="position")startPosition();else if(mode==="placement")startPlacement();else if(mode==="memory")startMemory();else if(mode==="explore")renderExplore();else if(mode==="scene")startScene();else{render();speak(round[step][0])}}
+function start(i){clearWrongHighlight();cancelAdvance();stopAudio();audioBusy=false;topicIndex=i;round=shuffled(itemsForTopic(i)).slice(0,6);step=0;score=0;display("game");if(mode==="position")startPosition();else if(mode==="placement")startPlacement();else if(mode==="memory")startMemory();else if(mode==="explore")renderExplore();else if(mode==="scene")startScene();else{render();speak(round[step][0])}}
 function render(){ audioBusy=false;el("spokenText").classList.add("hide");el("positionBoard").classList.add("hide");el("placementArea").classList.add("hide");el("sceneCanvas").classList.add("hide");el("choices").classList.remove("hide");el("choices").className="choices"+(difficulty===2?" level2":"");el("listen").classList.remove("hide");done=false;const t=topics[topicIndex],correct=round[step];el("heading").textContent=t.icon+" "+t.title;el("count").textContent=(step+1)+" / "+round.length;el("stars").textContent="⭐ "+score;el("bar").style.width=(step/round.length*100)+"%";el("message").textContent="";el("next").classList.add("hide");const area=el("choices");area.replaceChildren();const options=shuffled([correct,...shuffled(itemsForTopic(topicIndex).filter(w=>w!==correct)).slice(0,3)]);options.forEach(w=>{const b=document.createElement("button");b.className="choice";paintPicture(b,w);b.setAttribute("aria-label","OBRÁZEK "+w[0]);b.addEventListener("click",()=>choose(b,w===correct,correct,w));area.appendChild(b)});}
 function renderExplore(){ audioBusy=false;el("spokenText").classList.add("hide");el("positionBoard").classList.add("hide");el("sceneCanvas").classList.add("hide");el("choices").classList.remove("hide");
  const t=topics[topicIndex];el("heading").textContent=t.icon+" "+t.title;el("count").textContent="🔊";el("stars").textContent="⭐";el("bar").style.width="100%";el("listen").classList.add("hide");el("next").classList.add("hide");el("message").textContent="👆 KLEPNI NA OBRÁZEK";const area=el("choices");area.className="choices explore"+(difficulty===2?" level2":"");area.replaceChildren();
@@ -216,7 +220,7 @@ function renderScene(rebuild=false){
 function chooseScene(b,w){
  if(sceneDone||audioBusy)return;
  if(w===sceneItems[sceneStep]){sceneDone=true;sceneScore++;b.classList.add("correct");giveFeedback(true);scheduleAdvance();el("stars").textContent="⭐ "+sceneScore;el("next").textContent=sceneStep===sceneItems.length-1?"🏆 VÝSLEDEK":"➡️ DÁL";el("next").classList.remove("hide")}
- else{b.classList.add("wrong");setTimeout(()=>b.classList.remove("wrong"),1500);playWrong(w[0])}
+ else{playWrong(w[0],{highlight:b})}
 }
 const positionDirections=[
  {id:"oben",label:"NAHOŘE"},{id:"links",label:"VLEVO"},{id:"mitte",label:"UPROSTŘED"},{id:"rechts",label:"VPRAVO"},{id:"unten",label:"DOLE"}
@@ -255,7 +259,7 @@ function choosePosition(button,d){
  if(positionAnswered||audioBusy)return;
  if(d.id===positionRound[positionStep].dir){
   positionAnswered=true;positionScore++;button.classList.add("correct");giveFeedback(true);scheduleAdvance();el("stars").textContent="⭐ "+positionScore;el("next").textContent=positionStep===positionRound.length-1?"🏆 VÝSLEDEK":"➡️ DÁL";el("next").classList.remove("hide");
- }else{button.classList.add("wrong");setTimeout(()=>button.classList.remove("wrong"),1500);playWrong(({oben:"oben",unten:"unten",links:"links",rechts:"rechts",mitte:"in der Mitte"})[d.id])}
+ }else{playWrong(({oben:"oben",unten:"unten",links:"links",rechts:"rechts",mitte:"in der Mitte"})[d.id],{highlight:button})}
 }
 // Placement is intentionally a separate mode: four objects, five spatial targets.
 const placementObjects=[
@@ -321,16 +325,16 @@ function placeSelected(dir,target){
   el("stars").textContent="⭐ "+placementScore;el("bar").style.width=(placementStep+1)*10+"%";
   giveFeedback(true);scheduleAdvance();el("next").textContent=placementStep===9?"🏆 VÝSLEDEK":"➡️ DÁL";el("next").classList.remove("hide");
  }else{
-  placementLocked=true;target.classList.add("wrong");
+  placementLocked=true;
   const wrongWord=selected!==q.object?placementObjects[selected].noun:({oben:"oben",unten:"unten",links:"links",rechts:"rechts",mitte:"in der Mitte"})[dir];
-  setTimeout(()=>{placementLocked=false;target.classList.remove("wrong");if(item)item.classList.remove("selected");placementSelected=null},1500);playWrong(wrongWord);
+  setTimeout(()=>{placementLocked=false;if(item)item.classList.remove("selected");placementSelected=null},1500);playWrong(wrongWord,{highlight:target});
  }
 }
 function nextPlacement(){if(!placementDone)return;placementStep++;if(placementStep<10)renderPlacement();else{score=placementScore;finishGame(10)}}
 function nextPosition(){stopAudio();audioBusy=false;positionStep++;if(positionStep<positionRound.length)renderPosition();else{score=positionScore;finishGame(positionRound.length)}}
 function nextScene(){stopAudio();audioBusy=false;sceneStep++;if(sceneStep<sceneItems.length){renderScene(false)}else{score=sceneScore;finishGame(sceneItems.length)}}
-function choose(button,right,correct,selected){if(done||audioBusy)return;if(right){done=true;for(const b of el("choices").children)b.disabled=true;}if(right){score++;button.classList.add("correct");giveFeedback(true);scheduleAdvance()}else{button.classList.add("wrong");setTimeout(()=>button.classList.remove("wrong"),1500);playWrong(selected[0])}el("stars").textContent="⭐ "+score;el("next").textContent=step===round.length-1?"🏆 VÝSLEDEK":"➡️ DÁL";if(right)el("next").classList.remove("hide")}
-function next(){cancelAdvance();stopAudio();audioBusy=false;if(mode==="placement"){nextPlacement();return}if(mode==="position"){nextPosition();return}if(mode==="scene"){nextScene();return}if(mode==="memory"){score=pairsFound;finishGame(4);return}step++;if(step<round.length){render();speak(round[step][0]);return}el("bar").style.width="100%";try{const key="nemcina-hrou-"+difficulty+"-"+topicIndex;localStorage.setItem(key,String(Math.max(score,Number(localStorage.getItem(key)||0))))}catch(e){}el("result").textContent="⭐ "+score+" / "+round.length;display("finish");speak("Sehr gut!")}
+function choose(button,right,correct,selected){if(done||audioBusy)return;if(right){done=true;for(const b of el("choices").children)b.disabled=true;}if(right){score++;button.classList.add("correct");giveFeedback(true);scheduleAdvance()}else{playWrong(selected[0],{highlight:button})}el("stars").textContent="⭐ "+score;el("next").textContent=step===round.length-1?"🏆 VÝSLEDEK":"➡️ DÁL";if(right)el("next").classList.remove("hide")}
+function next(){clearWrongHighlight();cancelAdvance();stopAudio();audioBusy=false;if(mode==="placement"){nextPlacement();return}if(mode==="position"){nextPosition();return}if(mode==="scene"){nextScene();return}if(mode==="memory"){score=pairsFound;finishGame(4);return}step++;if(step<round.length){render();speak(round[step][0]);return}el("bar").style.width="100%";try{const key="nemcina-hrou-"+difficulty+"-"+topicIndex;localStorage.setItem(key,String(Math.max(score,Number(localStorage.getItem(key)||0))))}catch(e){}el("result").textContent="⭐ "+score+" / "+round.length;display("finish");speak("Sehr gut!")}
 el("positionStart").addEventListener("click",()=>startPositionFromHome());
 function startPositionFromHome(){stopAudio();display("game");if(mode==="placement")startPlacement();else startPosition()}
 function setDifficulty(value){difficulty=value;stopAudio();for(const n of [1,2]){const button=el("level"+n);button.classList.toggle("active",n===value);button.setAttribute("aria-pressed",String(n===value))}el("levelHelp").textContent=value===1?"JEDNODUCHÁ SLOVÍČKA A OBRÁZKY":"BAREVNÉ LISTY, ČERNÝ KLOBOUK, SLUNCE SVÍTÍ A DALŠÍ VĚTY"}
