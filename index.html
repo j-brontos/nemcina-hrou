@@ -18,12 +18,12 @@ const topics=[
 {title:"ZVÍŘÁTKA",icon:"🦋",items:[["der Schmetterling","🦋"],["der Marienkäfer","🐞"],["die Raupe","🐛"],["die Ameise","🐜"],["der Igel","🦔"],["die Biene","🐝"]]},
 {title:"LIDÉ",icon:"👋",items:[["das Mädchen","👧"],["der Junge","👦"],["die Frau","👩"],["der Mann","👨"],["das Baby","👶"],["die Oma","👵"]]},
 {title:"VĚTY A POZDRAVY",icon:"👋",items:[["Guten Morgen!","🌅"],["Wer bist du?","❓"],["Ich bin Dino.","🦕"],["Ich mag das.","❤️"],["Ich mag das nicht.","🙅"],["Es regnet.","🌧️"],["Was ist das?","👀"],["Gute Nacht!","🌙"]]},
-{title:"VĚCI KOLEM NÁS",icon:"🧸",items:[["der Regenschirm","☂️"],["der Schuh","👟"],["der Hut","🎩"],["das Buch","📖"],["der Ball","⚽"],["das Haus","🏠"]]}
+{title:"VĚCI KOLEM NÁS",icon:"🧸",items:[["der Regenschirm","☂️"],["der Schuh","👟"],["der Hut","🎩"],["das Buch","📖"],["der Fußball","⚽"],["das Haus","🏠"]]}
 ];
 
 // Obtížnost 2: jednoduchá slovní spojení a krátké věty; pořadí odpovídá tématům výše.
 const levelTwoItems=[
- [["das rote Blatt","🍁🔴"],["die bunten Blätter","🍁🍂"],["die braune Kastanie","🌰🟤"],["der schwarze Hut","🎩⚫"],["der gelbe Ball","🟡⚽"],["der grüne Baum","🌳🟢"],["der blaue Schirm","☂️🔵"]],
+ [["das rote Blatt","🍁🔴"],["die bunten Blätter","🍁🍂"],["die braune Kastanie","🌰🟤"],["der schwarze Hut","🎩⚫"],["der Fußball","⚽"],["der grüne Baum","🌳🟢"],["der blaue Schirm","☂️🔵"]],
  [["Die Sonne scheint.","☀️✨"],["Es regnet stark.","🌧️💦"],["Der Wind weht.","💨🍃"],["Es schneit.","❄️🌨️"],["Der Himmel ist blau.","🌤️🔵"],["Die Wolken ziehen.","☁️💨"]],
  [["die bunten Blätter","🍁🍂"],["die braune Kastanie","🌰🟤"],["der große Baum","🌳⬆️"],["der kleine Igel","🦔🐾"],["der rote Pilz","🍄🔴"],["der bunte Drachen","🪁🌈"]],
  [["der rote Apfel","🍎🔴"],["die gelbe Banane","🍌🟡"],["die grüne Birne","🍐🟢"],["die roten Kirschen","🍒🔴"],["die süße Orange","🍊😋"],["die blauen Trauben","🍇🔵"]],
@@ -31,7 +31,7 @@ const levelTwoItems=[
  [["der bunte Schmetterling","🦋🌈"],["die kleine Biene","🐝🐾"],["der rote Marienkäfer","🐞"],["die lange Raupe","🐛📏"],["die fleißige Ameise","🐜💪"],["der kleine Igel","🦔🐾"]],
  [["das kleine Mädchen","👧🐣"],["der große Junge","👦⬆️"],["die nette Oma","👵❤️"],["das kleine Baby","👶🐣"],["der fröhliche Mann","👨😄"],["die glückliche Frau","👩😊"]],
  [["Guten Morgen, Dino!","🌅🦕"],["Ich bin glücklich.","😊❤️"],["Ich habe Hunger.","😋🍽️"],["Ich bin müde.","🥱🌙"],["Ich mag Äpfel.","❤️🍎"],["Die Sonne scheint.","☀️✨"]],
- [["der schwarze Hut","🎩⚫"],["der rote Ball","⚽🔴"],["das blaue Buch","📘🔵"],["der gelbe Regenschirm","☂️🟡"],["das große Haus","🏠⬆️"],["die grünen Schuhe","👟🟢"]]
+ [["der schwarze Hut","🎩⚫"],["der Fußball","⚽"],["das blaue Buch","📘🔵"],["der gelbe Regenschirm","☂️🟡"],["das große Haus","🏠⬆️"],["die grünen Schuhe","👟🟢"]]
 ];
 const el=id=>document.getElementById(id);let difficulty=1,topicIndex=0,round=[],step=0,score=0,done=false,mode="quiz",memoryCards=[],firstCard=null,lockMemory=false,pairsFound=0;
 function shuffled(items){const a=[...items];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
@@ -152,6 +152,13 @@ function giveFeedback(correct,options={}){
 }
 function display(id){clearWrongHighlight();cancelAdvance();clearTimeout(wrongAnswerWatchdog);wrongAnswerWatchdog=null;stopAudio();audioBusy=false;placementLocked=false;if(id!=="game")el("spokenText").classList.add("hide");for(const name of ["home","game","finish","rhymes"])el(name).classList.toggle("hide",name!==id);if(id!=="game"){el("positionBoard").classList.add("hide");el("placementArea").classList.add("hide")}}
 function itemsForTopic(i){return difficulty===2?levelTwoItems[i]:topics[i].items}
+// Shared illustration for every football appearance, independent of difficulty.
+function soccerBallMarkup(){
+ return '<svg class="learningArt footballArt" viewBox="0 0 100 100" role="img" aria-label="fotbalový míč"><circle cx="50" cy="50" r="36" fill="#fff" stroke="#26313b" stroke-width="2.5"/><path d="M50 32 L67 44 L61 63 L39 63 L33 44Z" fill="#222831"/><path d="M50 32 L44 15 L57 15 L67 44 L82 36 L84 52 L61 63 L68 81 L55 86 L39 63 L21 72 L16 57 L33 44 L22 31 L33 20Z" fill="none" stroke="#222831" stroke-width="3.5"/><path d="M44 15 L33 20 L22 31 L16 57 L21 72 M57 15 L68 20 L82 36 L84 52 L68 81 L55 86" fill="none" stroke="#222831" stroke-width="3"/></svg>';
+}
+function isFootball(word){return /fußball|fussball/i.test(word[0])}
+function accessibleWord(word){return isFootball(word)?"fotbalový míč – "+word[0]:word[0]}
+function placementPicture(object){return object.noun==="Fußball"?soccerBallMarkup():object.icon}
 function pictureMarkup(word){
  const text=word[0].toLocaleLowerCase("de-DE"),emoji=word[1];
  const palette={rote:"#e64545",roten:"#e64545",braune:"#9b6235",schwarze:"#202638",gelbe:"#f2c831",grüne:"#47a963",grünen:"#47a963",blaue:"#3979d9",blauen:"#3979d9",bunten:"#e96736"};
@@ -164,18 +171,18 @@ function pictureMarkup(word){
  else if(text.includes("blatt")||text.includes("blätter"))shape='<path d="M50 10 Q90 30 77 63 Q65 87 50 92 Q25 74 16 53 Q12 30 50 10Z" fill="'+(color||"#df7434")+'"/><path d="M50 91 L50 26 M50 62 L27 44 M50 53 L73 34" stroke="#85502e" stroke-width="3" fill="none"/>';
  else if(text.includes("sonne"))shape='<circle cx="50" cy="50" r="25" fill="#f5c63b"/>'+Array.from({length:8},(_,i)=>{const a=i*Math.PI/4;return '<path d="M'+(50+33*Math.cos(a))+' '+(50+33*Math.sin(a))+' L'+(50+44*Math.cos(a))+' '+(50+44*Math.sin(a))+'" stroke="#e9aa27" stroke-width="6" stroke-linecap="round"/>'}).join("");
  else if(text.includes("regnet"))shape='<path d="M24 48 Q18 24 40 27 Q50 8 67 27 Q89 27 80 49Z" fill="#a5b6c7"/><path d="M28 62 L20 81 M50 62 L42 81 M72 62 L64 81" stroke="#3b8de2" stroke-width="7" stroke-linecap="round"/>';
- else if(text.includes("ball"))shape='<circle cx="50" cy="50" r="36" fill="#fff" stroke="#26313b" stroke-width="2.5"/><path d="M50 32 L67 44 L61 63 L39 63 L33 44Z" fill="#222831"/><path d="M50 32 L44 15 L57 15 L67 44 L82 36 L84 52 L61 63 L68 81 L55 86 L39 63 L21 72 L16 57 L33 44 L22 31 L33 20Z" fill="none" stroke="#222831" stroke-width="3.5"/><path d="M44 15 L33 20 L22 31 L16 57 L21 72 M57 15 L68 20 L82 36 L84 52 L68 81 L55 86" fill="none" stroke="#222831" stroke-width="3"/>';
+ else if(text.includes("fußball")||text.includes("fussball"))return soccerBallMarkup();
  else if(text.includes("buch"))shape='<path d="M19 17 H73 Q83 17 83 28 V84 H25 Q19 84 19 76Z" fill="'+(color||"#3979d9")+'"/><path d="M26 73 H83" stroke="#fff" stroke-width="5"/>';
  if(!shape)return '<span class="singleEmoji">'+(Array.from(emoji)[0]||"🎨")+'</span>';
  return '<svg class="learningArt" viewBox="0 0 100 100" role="img" aria-label="'+text.replace(/"/g,"")+'">'+shape+'</svg>';
 }
-function paintPicture(button,word){if(difficulty===2)button.innerHTML=pictureMarkup(word);else button.textContent=word[1]}
+function paintPicture(button,word){if(isFootball(word))button.innerHTML=soccerBallMarkup();else if(difficulty===2)button.innerHTML=pictureMarkup(word);else button.textContent=word[1]}
 function topicsUI(){const area=el("topics");area.replaceChildren();topics.forEach((t,i)=>{const b=document.createElement("button");b.className="topic";const pic=document.createElement("span");pic.className="picture";pic.textContent=t.icon;const label=document.createElement("span");label.textContent=t.title;b.append(pic,label);b.addEventListener("click",()=>start(i));area.appendChild(b)})}
 function start(i){clearWrongHighlight();cancelAdvance();stopAudio();audioBusy=false;topicIndex=i;round=shuffled(itemsForTopic(i)).slice(0,6);step=0;score=0;display("game");if(mode==="position")startPosition();else if(mode==="placement")startPlacement();else if(mode==="memory")startMemory();else if(mode==="explore")renderExplore();else if(mode==="scene")startScene();else{render();speak(round[step][0])}}
-function render(){ audioBusy=false;el("spokenText").classList.add("hide");el("positionBoard").classList.add("hide");el("placementArea").classList.add("hide");el("sceneCanvas").classList.add("hide");el("choices").classList.remove("hide");el("choices").className="choices"+(difficulty===2?" level2":"");el("listen").classList.remove("hide");done=false;const t=topics[topicIndex],correct=round[step];el("heading").textContent=t.icon+" "+t.title;el("count").textContent=(step+1)+" / "+round.length;el("stars").textContent="⭐ "+score;el("bar").style.width=(step/round.length*100)+"%";el("message").textContent="";el("next").classList.add("hide");const area=el("choices");area.replaceChildren();const options=shuffled([correct,...shuffled(itemsForTopic(topicIndex).filter(w=>w!==correct)).slice(0,3)]);options.forEach(w=>{const b=document.createElement("button");b.className="choice";paintPicture(b,w);b.setAttribute("aria-label","OBRÁZEK "+w[0]);b.addEventListener("click",()=>choose(b,w===correct,correct,w));area.appendChild(b)});}
+function render(){ audioBusy=false;el("spokenText").classList.add("hide");el("positionBoard").classList.add("hide");el("placementArea").classList.add("hide");el("sceneCanvas").classList.add("hide");el("choices").classList.remove("hide");el("choices").className="choices"+(difficulty===2?" level2":"");el("listen").classList.remove("hide");done=false;const t=topics[topicIndex],correct=round[step];el("heading").textContent=t.icon+" "+t.title;el("count").textContent=(step+1)+" / "+round.length;el("stars").textContent="⭐ "+score;el("bar").style.width=(step/round.length*100)+"%";el("message").textContent="";el("next").classList.add("hide");const area=el("choices");area.replaceChildren();const options=shuffled([correct,...shuffled(itemsForTopic(topicIndex).filter(w=>w!==correct)).slice(0,3)]);options.forEach(w=>{const b=document.createElement("button");b.className="choice";paintPicture(b,w);b.setAttribute("aria-label","OBRÁZEK "+accessibleWord(w));b.addEventListener("click",()=>choose(b,w===correct,correct,w));area.appendChild(b)});}
 function renderExplore(){ audioBusy=false;el("spokenText").classList.add("hide");el("positionBoard").classList.add("hide");el("sceneCanvas").classList.add("hide");el("choices").classList.remove("hide");
  const t=topics[topicIndex];el("heading").textContent=t.icon+" "+t.title;el("count").textContent="🔊";el("stars").textContent="⭐";el("bar").style.width="100%";el("listen").classList.add("hide");el("next").classList.add("hide");el("message").textContent="👆 KLEPNI NA OBRÁZEK";const area=el("choices");area.className="choices explore"+(difficulty===2?" level2":"");area.replaceChildren();
- itemsForTopic(topicIndex).forEach(w=>{const b=document.createElement("button");b.className="choice";paintPicture(b,w);b.setAttribute("aria-label","PŘEHRÁT "+w[0]);b.addEventListener("click",()=>{for(const c of area.children)c.classList.remove("correct");b.classList.add("correct");speak(w[0])});area.appendChild(b)})
+ itemsForTopic(topicIndex).forEach(w=>{const b=document.createElement("button");b.className="choice";paintPicture(b,w);b.setAttribute("aria-label","PŘEHRÁT "+accessibleWord(w));b.addEventListener("click",()=>{for(const c of area.children)c.classList.remove("correct");b.classList.add("correct");speak(w[0])});area.appendChild(b)})
 }
 function startMemory(){ audioBusy=false;el("spokenText").classList.add("hide");el("positionBoard").classList.add("hide");el("sceneCanvas").classList.add("hide");el("choices").classList.remove("hide");
  const selected=shuffled(itemsForTopic(topicIndex)).slice(0,4);
@@ -215,7 +222,7 @@ function renderScene(rebuild=false){
   area.replaceChildren();const layout=sceneLayouts[topicIndex]||sceneLayouts[0];area.dataset.theme=layout.theme;
   layout.decor.forEach(([emoji,x,y,size])=>{const span=document.createElement("span");span.className="sceneDecor";span.textContent=emoji;span.style.left=x+"%";span.style.top=y+"%";span.style.fontSize=size+"px";span.style.transform="translate(-50%,-50%)";area.appendChild(span)});
   const spots=shuffled(layout.spots).slice(0,sceneItems.length);
-  sceneItems.forEach((w,i)=>{const [x,y]=spots[i];const b=document.createElement("button");b.className="sceneItem";paintPicture(b,w);b.style.left=x+"%";b.style.top=y+"%";b.style.setProperty("--w","19%");b.style.setProperty("--h","21%");b.setAttribute("aria-label","NAJÍT "+w[0]);b.addEventListener("click",()=>chooseScene(b,w));area.appendChild(b)});
+  sceneItems.forEach((w,i)=>{const [x,y]=spots[i];const b=document.createElement("button");b.className="sceneItem";paintPicture(b,w);b.style.left=x+"%";b.style.top=y+"%";b.style.setProperty("--w","19%");b.style.setProperty("--h","21%");b.setAttribute("aria-label","NAJÍT "+accessibleWord(w));b.addEventListener("click",()=>chooseScene(b,w));area.appendChild(b)});
   const hint=document.createElement("div");hint.className="sceneHint";hint.textContent="👆 NAJDI SPRÁVNÝ OBRÁZEK";area.appendChild(hint)
  }
  area.querySelectorAll(".sceneItem").forEach(b=>b.classList.remove("correct","wrong"));
@@ -271,7 +278,7 @@ const placementObjects=[
  {icon:"🎩",noun:"Hut",article:"den",adjective:"schwarzen"},
  {icon:"🦋",noun:"Schmetterling",article:"den",adjective:"bunten"},
  {icon:"🍄",noun:"Pilz",article:"den",adjective:"roten"},
- {icon:"⚽",noun:"Ball",article:"den",adjective:"roten"},
+ {icon:"⚽",noun:"Fußball",article:"den",adjective:"schwarz-weißen"},
  {icon:"📘",noun:"Buch",article:"das",adjective:"blaue"},
  {icon:"🐱",noun:"Katze",article:"die",adjective:"kleine"},
  {icon:"🌳",noun:"Baum",article:"den",adjective:"grünen"}
@@ -303,8 +310,8 @@ function renderPlacement(){
  });
  const alternatives=shuffled(placementObjects.map((_,i)=>i).filter(i=>i!==q.object)).slice(0,3);
  shuffled([q.object,...alternatives]).forEach(i=>{
-  const b=document.createElement("button");b.className="placementItem";b.textContent=placementObjects[i].icon;
-  b.dataset.object=String(i);b.setAttribute("aria-label",placementObjects[i].noun);
+  const b=document.createElement("button");b.className="placementItem";b.innerHTML=placementPicture(placementObjects[i]);
+  b.dataset.object=String(i);b.setAttribute("aria-label",placementObjects[i].noun==="Fußball"?"fotbalový míč – Fußball":placementObjects[i].noun);
   b.addEventListener("click",()=>selectPlacement(i,b));
   b.addEventListener("pointerdown",e=>{if(placementLocked||placementDone)return;placementPointer={id:e.pointerId,x:e.clientX,y:e.clientY,i,button:b,moved:false};});
   b.addEventListener("pointermove",e=>{if(!placementPointer||placementPointer.id!==e.pointerId)return;
@@ -325,7 +332,7 @@ function placeSelected(dir,target){
  const q=placementRound[placementStep],selected=placementSelected;
  const item=el("placementChoices").querySelector('[data-object="'+selected+'"]');
  if(selected===q.object&&dir===q.dir){
-  placementDone=true;placementScore++;target.textContent=placementObjects[selected].icon;target.classList.add("correct");
+  placementDone=true;placementScore++;target.innerHTML=placementPicture(placementObjects[selected]);target.classList.add("correct");
   el("stars").textContent="⭐ "+placementScore;el("bar").style.width=(placementStep+1)*10+"%";
   giveFeedback(true);scheduleAdvance();el("next").textContent=placementStep===9?"🏆 VÝSLEDEK":"➡️ DÁL";el("next").classList.remove("hide");
  }else{
