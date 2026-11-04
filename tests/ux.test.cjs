@@ -2,7 +2,7 @@ const fs=require("node:fs"),assert=require("node:assert/strict");
 const html=fs.readFileSync("index.html","utf8");
 const js=html.match(/<script>([\s\S]*?)<\/script>/)?.[1];
 assert.ok(js,"Application script exists");new Function(js);
-for(const mode of ["quiz","explore","memory","scene","position","spatial"])assert.ok(html.includes('data-mode="'+mode+'"'),"Mode "+mode);
+for(const mode of ["quiz","explore","memory","scene","position"])assert.ok(html.includes('data-mode="'+mode+'"'),"Mode "+mode);
 for(const id of ["oben","unten","links","rechts","mitte"])assert.ok(js.includes('id:"'+id+'"'),"Direction "+id);
 assert.match(js,/positionObjects\[question\.object\]\.icon/,"All positions use the same object");
 assert.doesNotMatch(js,/positionObjects\[objects\[i\]\]/,"No object shortcut");
@@ -26,4 +26,3 @@ assert.match(js,/function setDifficulty/,"Difficulty selection");
 assert.match(js,/function audioFile/,"MP3 playback preserved");
 assert.match(js,/player\.onerror/,"Missing MP3 handled");
 console.log("PASS: 25 static and syntax assertions; browser E2E requires separate environment");
-

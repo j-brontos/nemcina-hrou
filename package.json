@@ -1,6 +1,0 @@
-{
-  "name": "nemcina-hrou",
-  "private": true,
-  "scripts": {"test": "node tests/ux.test.cjs && node tests/audio.test.cjs", "test:browser": "node tests/browser.cjs"},
-  "devDependencies": {"playwright": "1.56.1"}
-}

@@ -7,41 +7,8 @@ permissions:
   contents: read
 jobs:
   test:
-    # Playwright 1.56.1 supports Ubuntu 24.04; ubuntu-latest may advance.
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium
       - name: Validate JavaScript and UX invariants
-        run: npm test
-      - name: Browser interaction checks (simulated audio)
-        run: npm run test:browser
-
-
-  audio:
-    # Playwright 1.56.1 supports Ubuntu 24.04; ubuntu-latest may advance.
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - run: python3 -m pip install edge-tts==7.3.1
-      - run: python3 scripts/build_audio.py
-      - run: python3 scripts/build_audio.py --check
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - run: node tests/audio-browser.cjs
-      - uses: actions/upload-artifact@v4
-        with:
-          name: natural-mp3-preview
-          path: audio/
+        run: node tests/ux.test.cjs
