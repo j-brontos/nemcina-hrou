@@ -20,13 +20,21 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Install offline German speech generator
-        run: sudo apt-get update && sudo apt-get install -y espeak ffmpeg
+      - name: Install natural German speech generator
+        run: python3 -m pip install --user --break-system-packages edge-tts
+      - name: Restore cached neural MP3 files
+        uses: actions/cache/restore@v4
+        with:
+          path: audio
+          key: german-katja-neural-v2-${{ hashFiles('index.html') }}
+          restore-keys: |
+            german-katja-neural-v2-
       - name: Generate German MP3 files
         shell: bash
         run: |
           python3 - <<'PY'
-          import pathlib, re, subprocess, tempfile, urllib.parse
+          import asyncio, pathlib, re, urllib.parse
+          import edge_tts
           source = pathlib.Path("index.html").read_text(encoding="utf-8")
           words = set(re.findall(r'\["([^"]+)","[^"]+"\]', source))
           words.update(["Super!", "Sehr gut!"])
@@ -36,19 +44,37 @@ jobs:
               words.update(re.findall(r'"([^"]+)"', block))
           target = pathlib.Path("audio")
           target.mkdir(exist_ok=True)
-          for word in sorted(words):
+          async def generate(word, semaphore):
               filename = urllib.parse.quote(word, safe="").replace("%", "_") + ".mp3"
               output = target / filename
               if output.exists() and output.stat().st_size > 1000:
-                  continue
-              with tempfile.TemporaryDirectory() as tmp:
-                  wav = pathlib.Path(tmp) / "voice.wav"
-                  subprocess.run(["espeak", "-v", "de", "-s", "135", "-w", str(wav), word], check=True, timeout=30)
-                  subprocess.run(["ffmpeg", "-nostdin", "-loglevel", "error", "-y", "-i", str(wav), "-codec:a", "libmp3lame", "-qscale:a", "5", str(output)], check=True, timeout=30)
-              if output.stat().st_size < 1000:
-                  raise RuntimeError(f"Invalid MP3: {word}")
-          print(f"Generated or reused {len(words)} German audio files")
+                  return
+              async with semaphore:
+                  for attempt in range(4):
+                      try:
+                          await asyncio.wait_for(
+                              edge_tts.Communicate(word, "de-DE-KatjaNeural", rate="-10%").save(str(output)),
+                              timeout=45
+                          )
+                          if output.stat().st_size > 1000:
+                              return
+                          raise RuntimeError("MP3 file too small")
+                      except Exception as exc:
+                          print(f"Neural voice failed ({attempt + 1}/4) for {word}: {exc}", flush=True)
+                          output.unlink(missing_ok=True)
+                          await asyncio.sleep(2 * (attempt + 1))
+                  raise RuntimeError(f"Cannot generate natural voice for {word}")
+          async def main():
+              semaphore = asyncio.Semaphore(4)
+              await asyncio.gather(*(generate(word, semaphore) for word in sorted(words)))
+          asyncio.run(main())
+          print(f"Natural Katja Neural MP3 ready: {len(words)} phrases")
           PY
+      - name: Cache natural German audio
+        uses: actions/cache/save@v4
+        with:
+          path: audio
+          key: german-katja-neural-v2-${{ hashFiles('index.html') }}
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload site
