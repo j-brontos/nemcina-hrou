@@ -39,6 +39,7 @@ jobs:
           words = set(re.findall(r'\["([^"]+)","[^"]+"\]', source))
           words.update(["Super!", "Sehr gut!"])
           words.update(re.findall(r'speech:"([^"]+)"', source))
+          words.update(re.findall(r'sentence:"([^"]+)"', source))
           words.update(re.findall(r'feedback:"([^"]+)"', source))
           for block in re.findall(r'lines:\[([^\]]+)\]', source):
               words.update(re.findall(r'"([^"]+)"', block))
