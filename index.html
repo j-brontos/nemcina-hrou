@@ -51,7 +51,7 @@ function speak(word,options={}){
  const speed=el("slow").checked?0.78:1,twice=el("repeat").checked&&!options.once;
  function playOnce(remaining){
   if(token!==playbackToken)return;
-  const player=new Audio(audioFile(word));audioPlayer=player;player.playbackRate=speed;player.preservesPitch=true;
+  const player=new Audio(audioFile(word));audioPlayer=player;player.playbackRate=options.quick?Math.min(1.2,speed*1.15):speed;player.preservesPitch=true;
   player.onended=()=>{if(token!==playbackToken)return;if(remaining>1){repeatTimer=setTimeout(()=>playOnce(remaining-1),350)}else finish()};
   player.onerror=()=>{if(token===playbackToken){el("message").textContent="🔇 ZVUK NENÍ DOSTUPNÝ";finish()}};
   try{const promise=player.play();if(promise&&promise.catch)promise.catch(()=>{if(token===playbackToken){el("message").textContent="🔇 KLEPNI NA 🔊";finish()}})}catch(e){finish()}
@@ -81,13 +81,13 @@ function playErrorTone(onEnd){
   const oscillator=ctx.createOscillator(),gain=ctx.createGain();
   oscillator.type="sine";
   oscillator.frequency.setValueAtTime(390,start);
-  oscillator.frequency.exponentialRampToValueAtTime(190,start+0.34);
+  oscillator.frequency.exponentialRampToValueAtTime(190,start+0.19);
   gain.gain.setValueAtTime(0.0001,start);
-  gain.gain.exponentialRampToValueAtTime(0.17,start+0.025);
-  gain.gain.exponentialRampToValueAtTime(0.0001,start+0.36);
+  gain.gain.exponentialRampToValueAtTime(0.17,start+0.015);
+  gain.gain.exponentialRampToValueAtTime(0.0001,start+0.21);
   oscillator.connect(gain);gain.connect(ctx.destination);
   oscillator.onended=()=>{oscillator.disconnect();gain.disconnect();finish()};
-  oscillator.start(start);oscillator.stop(start+0.37);
+  oscillator.start(start);oscillator.stop(start+0.22);
  }catch(e){finish()}
 }
 function playWrong(word,options={}){
@@ -105,17 +105,17 @@ function playWrong(word,options={}){
  el("message").textContent=feedback.label;
  const replayTask=()=>{
   if(!active())return;
-  if(task&&mode!=="memory"){showWord(task);speak(task,{once:true});sequenceToken=playbackToken}
+  if(task&&mode!=="memory"){showWord(task);speak(task,{once:true,quick:true});sequenceToken=playbackToken}
   else if(word)showWord(word);
  };
  const playFeedback=()=>{
   if(!active())return;
   el("message").textContent=feedback.label;
-  speak(feedback.feedback,{once:true,showWord:false,onEnd:replayTask});sequenceToken=playbackToken;
+  speak(feedback.feedback,{once:true,quick:true,showWord:false,onEnd:replayTask});sequenceToken=playbackToken;
  };
  const playSelected=()=>{
   if(!active())return;
-  if(word){speak(word,{once:true,onEnd:playFeedback});sequenceToken=playbackToken;}
+  if(word){speak(word,{once:true,quick:true,onEnd:playFeedback});sequenceToken=playbackToken;}
   else playFeedback();
  };
  playErrorTone(playSelected);
