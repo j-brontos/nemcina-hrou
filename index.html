@@ -94,7 +94,7 @@ function playWrong(word,options={}){
  // Tone -> selected answer -> original German error feedback -> original task.
  // A new answer can interrupt the sequence immediately.
  stopAudio();audioBusy=false;
- const sequenceToken=playbackToken;
+ let sequenceToken=playbackToken;
  const task=currentTaskSpeech();
  const wrongChoices=feedbackMessages.wrong;
  let index=Math.floor(Math.random()*wrongChoices.length);
@@ -105,17 +105,17 @@ function playWrong(word,options={}){
  el("message").textContent=feedback.label;
  const replayTask=()=>{
   if(!active())return;
-  if(task&&mode!=="memory"){showWord(task);speak(task,{once:true})}
+  if(task&&mode!=="memory"){showWord(task);speak(task,{once:true});sequenceToken=playbackToken}
   else if(word)showWord(word);
  };
  const playFeedback=()=>{
   if(!active())return;
   el("message").textContent=feedback.label;
-  speak(feedback.feedback,{once:true,showWord:false,onEnd:replayTask});
+  speak(feedback.feedback,{once:true,showWord:false,onEnd:replayTask});sequenceToken=playbackToken;
  };
  const playSelected=()=>{
   if(!active())return;
-  if(word)speak(word,{once:true,onEnd:playFeedback});
+  if(word){speak(word,{once:true,onEnd:playFeedback});sequenceToken=playbackToken;}
   else playFeedback();
  };
  playErrorTone(playSelected);
