@@ -26,9 +26,9 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: audio
-          key: german-katja-neural-v2-${{ hashFiles('index.html') }}
+          key: german-katja-neural-v3-${{ hashFiles('index.html') }}
           restore-keys: |
-            german-katja-neural-v2-
+            german-katja-neural-v3-
       - name: Generate German MP3 files
         shell: bash
         run: |
@@ -43,6 +43,15 @@ jobs:
           words.update(re.findall(r'feedback:"([^"]+)"', source))
           for block in re.findall(r'lines:\[([^\]]+)\]', source):
               words.update(re.findall(r'"([^"]+)"', block))
+          # Placement instructions are assembled dynamically in JavaScript.
+          # Pre-generate all combinations for both difficulty levels.
+          objects = re.findall(r'\{icon:"[^"]+",noun:"([^"]+)",article:"([^"]+)",adjective:"([^"]+)"\}', source)
+          directions = ["nach oben", "nach unten", "nach links", "nach rechts", "in die Mitte"]
+          for noun, article, adjective in objects:
+              for direction in directions:
+                  words.add(f"Lege {article} {noun} {direction}.")
+                  words.add(f"Lege {article} {adjective} {noun} {direction}.")
+          words.update(["oben", "unten", "links", "rechts", "in der Mitte"])
           target = pathlib.Path("audio")
           target.mkdir(exist_ok=True)
           async def generate(word, semaphore):
@@ -75,7 +84,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: audio
-          key: german-katja-neural-v2-${{ hashFiles('index.html') }}
+          key: german-katja-neural-v3-${{ hashFiles('index.html') }}
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload site
