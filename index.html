@@ -91,20 +91,37 @@ function playErrorTone(onEnd){
  }catch(e){finish()}
 }
 function playWrong(word,options={}){
- // Wrong answer: negative tone, then repeat and redisplay the original task.
- // Do not wait for any speech before accepting another attempt.
+ // Tone -> selected answer -> original German error feedback -> original task.
+ // A new answer can interrupt the sequence immediately.
  stopAudio();audioBusy=false;
+ const sequenceToken=playbackToken;
  const task=currentTaskSpeech();
- if(task)showWord(task);
- el("message").textContent="❌ ZKUS TO ZNOVU";
- playErrorTone(()=>{
-  if(task&&mode!=="memory"&&!el("game").classList.contains("hide")){
-   showWord(task);
-   speak(task,{once:true});
-  }
- });
+ const wrongChoices=feedbackMessages.wrong;
+ let index=Math.floor(Math.random()*wrongChoices.length);
+ if(wrongChoices.length>1&&index===previousFeedback.wrong)index=(index+1)%wrongChoices.length;
+ previousFeedback.wrong=index;
+ const feedback=wrongChoices[index];
+ const active=()=>sequenceToken===playbackToken&&!el("game").classList.contains("hide");
+ el("message").textContent=feedback.label;
+ const replayTask=()=>{
+  if(!active())return;
+  if(task&&mode!=="memory"){showWord(task);speak(task,{once:true})}
+  else if(word)showWord(word);
+ };
+ const playFeedback=()=>{
+  if(!active())return;
+  el("message").textContent=feedback.label;
+  speak(feedback.feedback,{once:true,showWord:false,onEnd:replayTask});
+ };
+ const playSelected=()=>{
+  if(!active())return;
+  if(word)speak(word,{once:true,onEnd:playFeedback});
+  else playFeedback();
+ };
+ playErrorTone(playSelected);
  if(options.onEnd)options.onEnd();
 }
+
 const gameInstructions={
  placement:"Poslouchej a přesuň správný obrázek na správné místo.",
  quiz:"Poslouchej německé slovíčko a klepni na správný obrázek.",
