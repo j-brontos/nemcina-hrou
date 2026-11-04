@@ -37,12 +37,56 @@ jobs:
           import edge_tts
           source = pathlib.Path("index.html").read_text(encoding="utf-8")
           words = set(re.findall(r'\["([^"]+)","[^"]+"\]', source))
-          words.update(["Super!", "Sehr gut!"])
+          words.update(["Super!", "Sehr gut!", "oben", "unten", "links", "rechts", "in der Mitte"])
           words.update(re.findall(r'speech:"([^"]+)"', source))
           words.update(re.findall(r'sentence:"([^"]+)"', source))
           words.update(re.findall(r'feedback:"([^"]+)"', source))
           for block in re.findall(r'lines:\[([^\]]+)\]', source):
               words.update(re.findall(r'"([^"]+)"', block))
+          instructions = re.findall(r'^ (?:quiz|explore|memory|scene|position):"([^"]+)"[,]?
+          target.mkdir(exist_ok=True)
+          async def generate(word, semaphore):
+              filename = urllib.parse.quote(word, safe="").replace("%", "_") + ".mp3"
+              output = target / filename
+              if output.exists() and output.stat().st_size > 1000:
+                  return
+              async with semaphore:
+                  for attempt in range(4):
+                      try:
+                          await asyncio.wait_for(
+                              edge_tts.Communicate(word, "cs-CZ-VlastaNeural" if word in instructions else "de-DE-KatjaNeural", rate="-10%").save(str(output)),
+                              timeout=45
+                          )
+                          if output.stat().st_size > 1000:
+                              return
+                          raise RuntimeError("MP3 file too small")
+                      except Exception as exc:
+                          print(f"Neural voice failed ({attempt + 1}/4) for {word}: {exc}", flush=True)
+                          output.unlink(missing_ok=True)
+                          await asyncio.sleep(2 * (attempt + 1))
+                  raise RuntimeError(f"Cannot generate natural voice for {word}")
+          async def main():
+              semaphore = asyncio.Semaphore(4)
+              await asyncio.gather(*(generate(word, semaphore) for word in sorted(words)))
+          asyncio.run(main())
+          print(f"Natural Katja Neural MP3 ready: {len(words)} phrases")
+          PY
+      - name: Cache natural German audio
+        uses: actions/cache/save@v4
+        with:
+          path: audio
+          key: german-katja-neural-v2-${{ hashFiles('index.html') }}
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
+, source, re.MULTILINE)
+          words.update(instructions)
           target = pathlib.Path("audio")
           target.mkdir(exist_ok=True)
           async def generate(word, semaphore):
