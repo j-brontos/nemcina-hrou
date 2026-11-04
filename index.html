@@ -57,22 +57,12 @@ function speak(word,options={}){
  playOnce(twice?2:1);
 }
 function playWrong(word,options={}){
- if(audioBusy)return;
- audioBusy=true;
- // A missing or interrupted MP3 must never lock the child's answers indefinitely.
- let completed=false;
- const release=()=>{
-  if(completed)return;
-  completed=true;clearTimeout(wrongAnswerWatchdog);wrongAnswerWatchdog=null;
-  audioBusy=false;if(options.onEnd)options.onEnd();
- };
- clearTimeout(wrongAnswerWatchdog);
- wrongAnswerWatchdog=setTimeout(()=>{stopAudio();release()},4500);
+ // Wrong answers never lock interaction. A new tap interrupts the feedback.
+ audioBusy=false;
  speak(word,{once:true,onEnd:()=>{
-  repeatTimer=setTimeout(()=>{
-   giveFeedback(false,{onEnd:release});
-  },300);
+  repeatTimer=setTimeout(()=>giveFeedback(false),300);
  }});
+ if(options.onEnd)options.onEnd();
 }
 const gameInstructions={
  placement:"Poslouchej a přesuň správný obrázek na správné místo.",
