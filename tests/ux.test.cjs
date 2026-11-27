@@ -2,7 +2,7 @@ const fs=require("node:fs"),assert=require("node:assert/strict"),cp=require("nod
 const html=fs.readFileSync("index.html","utf8");
 assert.match(html,/<script type="module" src="js\/application\.js"><\/script>/);
 const paths=["js/application.js",...fs.readdirSync("js/classes").filter(x=>x.endsWith(".js")).map(x=>"js/classes/"+x)];
-const js=paths.map(p=>{cp.execFileSync(process.execPath,["--experimental-default-type=module","--check",p]);return fs.readFileSync(p,"utf8")}).join("\n");
+const js=paths.map(p=>{cp.execFileSync(process.execPath,["--input-type=module","--check"],{input:fs.readFileSync(p,"utf8")});return fs.readFileSync(p,"utf8")}).join("\n");
 for(const mode of ["quiz","explore","memory","scene","position","placement"])assert.ok(html.includes('data-mode="'+mode+'"'),"Mode "+mode);
 for(const id of ["oben","unten","links","rechts","mitte"])assert.ok(js.includes('id:"'+id+'"'),"Direction "+id);
 assert.match(js,/positionObjects\[question\.object\]\.icon/,"All positions use the same object");
