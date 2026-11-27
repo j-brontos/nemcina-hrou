@@ -11,7 +11,11 @@ const { feedbackManager, stopAudio, audioFile, speak, playErrorTone, showWord, s
 this.playbackToken++;if(this.speechUtterance){this.speechUtterance=null;globalThis.speechSynthesis?.cancel()}if(this.repeatTimer){clearTimeout(this.repeatTimer);this.repeatTimer=null}if(this.audioPlayer){this.audioPlayer.pause();this.audioPlayer.onended=null;this.audioPlayer=null}}
 audioFile(word){
 const { feedbackManager, stopAudio, audioFile, speak, playErrorTone, showWord, start, el, state } = this.context;
-return "audio/"+encodeURIComponent(word).replace(/[!'()*]/g,c=>"%"+c.charCodeAt(0).toString(16).toUpperCase()).replace(/%/g,"_")+".mp3"}
+const encoded=encodeURIComponent(word).replace(/[!'()*]/g,c=>"%"+c.charCodeAt(0).toString(16).toUpperCase()).replace(/%/g,"_");
+if(encoded.length<=240)return "audio/"+encoded+".mp3";
+let h1=2166136261,h2=2246822519;
+for(let i=0;i<word.length;i++){const c=word.charCodeAt(i);h1=Math.imul(h1^c,16777619);h2=Math.imul(h2^c,3266489917)}
+return "audio/long-"+(h1>>>0).toString(16).padStart(8,"0")+(h2>>>0).toString(16).padStart(8,"0")+".mp3"}
 speak(word,options={}){
 const { feedbackManager, stopAudio, audioFile, speak, playErrorTone, showWord, start, el, state } = this.context;
 
