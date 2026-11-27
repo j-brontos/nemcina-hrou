@@ -13,7 +13,7 @@ clearWrongHighlight();if(element){element.classList.add("wrong");this.activeWron
 playWrong(word,options={}){
 const { audioManager, stopAudio, speak, playErrorTone, clearWrongHighlight, markWrongHighlight, playWrong, giveFeedback, showWord, currentTaskSpeech, el, feedbackMessages, state } = this.context;
 
- // Tone -> selected answer -> original German error feedback -> original task.
+ // Spoken error -> selected answer -> original German error feedback -> original task.
  // A new answer can interrupt the sequence immediately.
  stopAudio();state.audioBusy=false;
  let sequenceToken=audioManager.playbackToken;
@@ -28,20 +28,20 @@ const { audioManager, stopAudio, speak, playErrorTone, clearWrongHighlight, mark
  el("message").textContent=feedback.label;
  const replayTask=()=>{
   if(!active())return;
-  if(task&&state.mode!=="memory"){showWord(task);sequenceToken=audioManager.playbackToken+1;speak(task,{once:true,quick:true,onEnd:()=>{if(active())clearWrongHighlight()}})}
+  if(task&&state.mode!=="memory"){showWord(task);sequenceToken=audioManager.playbackToken+1;speak(task,{once:true,quick:1.2,onEnd:()=>{if(active())clearWrongHighlight()}})}
   else {if(word)showWord(word);clearWrongHighlight()}
  };
  const playFeedback=()=>{
   if(!active())return;
   el("message").textContent=feedback.label;
-  sequenceToken=audioManager.playbackToken+1;speak(feedback.feedback,{once:true,quick:true,showWord:false,onEnd:replayTask});
+  sequenceToken=audioManager.playbackToken+1;speak(feedback.feedback,{once:true,quick:1.2,showWord:false,onEnd:replayTask});
  };
  const playSelected=()=>{
   if(!active())return;
-  if(word){sequenceToken=audioManager.playbackToken+1;speak(word,{once:true,quick:true,onEnd:playFeedback});}
+  if(word){sequenceToken=audioManager.playbackToken+1;speak(word,{once:true,quick:1.2,onEnd:playFeedback});}
   else playFeedback();
  };
- playErrorTone(playSelected);
+ sequenceToken=audioManager.playbackToken+1;speak("Falsch!",{once:true,quick:1.2,showWord:false,onEnd:playSelected});
  if(options.onEnd)options.onEnd();
 }
 giveFeedback(correct,options={}){

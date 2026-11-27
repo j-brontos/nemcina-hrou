@@ -9,7 +9,7 @@ assert.match(js,/positionObjects\[question\.object\]\.icon/,"All positions use t
 assert.doesNotMatch(js,/positionObjects\[objects\[i\]\]/);
 assert.match(js,/if\(this\.positionAnswered\|\|state\.audioBusy\)return/);
 assert.match(js,/playWrong\(word,options=\{\}\)/);
-assert.match(js,/playErrorTone\(playSelected\)/);
+assert.match(js,/speak\("Falsch!",\{once:true,quick:1\.2,showWord:false,onEnd:playSelected\}\)/);
 assert.match(js,/onEnd:replayTask/);
 assert.match(js,/showWord\(word\)/);
 assert.match(js,/showWord:false/);
