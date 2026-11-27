@@ -1,13 +1,25 @@
-import { soccerBallMarkup, isFootball, accessibleWord, placementPicture, pictureMarkup, paintPicture, state } from "../application.js";
+
 export class PictureRenderer {
+constructor(context){this.context=context;}
+
 
 soccerBallMarkup(){
+const { soccerBallMarkup, isFootball, accessibleWord, placementPicture, pictureMarkup, paintPicture, state } = this.context;
+
  return '<svg class="learningArt footballArt" viewBox="0 0 100 100" role="img" aria-label="fotbalový míč"><circle cx="50" cy="50" r="36" fill="#fff" stroke="#26313b" stroke-width="2.5"/><path d="M50 32 L67 44 L61 63 L39 63 L33 44Z" fill="#222831"/><path d="M50 32 L44 15 L57 15 L67 44 L82 36 L84 52 L61 63 L68 81 L55 86 L39 63 L21 72 L16 57 L33 44 L22 31 L33 20Z" fill="none" stroke="#222831" stroke-width="3.5"/><path d="M44 15 L33 20 L22 31 L16 57 L21 72 M57 15 L68 20 L82 36 L84 52 L68 81 L55 86" fill="none" stroke="#222831" stroke-width="3"/></svg>';
 }
-isFootball(word){return /fußball|fussball/i.test(word[0])}
-accessibleWord(word){return isFootball(word)?"fotbalový míč – "+word[0]:word[0]}
-placementPicture(object){return object.noun==="Fußball"?soccerBallMarkup():object.icon}
+isFootball(word){
+const { soccerBallMarkup, isFootball, accessibleWord, placementPicture, pictureMarkup, paintPicture, state } = this.context;
+return /fußball|fussball/i.test(word[0])}
+accessibleWord(word){
+const { soccerBallMarkup, isFootball, accessibleWord, placementPicture, pictureMarkup, paintPicture, state } = this.context;
+return isFootball(word)?"fotbalový míč – "+word[0]:word[0]}
+placementPicture(object){
+const { soccerBallMarkup, isFootball, accessibleWord, placementPicture, pictureMarkup, paintPicture, state } = this.context;
+return object.noun==="Fußball"?soccerBallMarkup():object.icon}
 pictureMarkup(word){
+const { soccerBallMarkup, isFootball, accessibleWord, placementPicture, pictureMarkup, paintPicture, state } = this.context;
+
  const text=word[0].toLocaleLowerCase("de-DE"),emoji=word[1];
  const palette={rote:"#e64545",roten:"#e64545",braune:"#9b6235",schwarze:"#202638",gelbe:"#f2c831",grüne:"#47a963",grünen:"#47a963",blaue:"#3979d9",blauen:"#3979d9",bunten:"#e96736"};
  const color=Object.entries(palette).find(([key])=>text.includes(key))?.[1];
@@ -24,5 +36,7 @@ pictureMarkup(word){
  if(!shape)return '<span class="singleEmoji">'+(Array.from(emoji)[0]||"🎨")+'</span>';
  return '<svg class="learningArt" viewBox="0 0 100 100" role="img" aria-label="'+text.replace(/"/g,"")+'">'+shape+'</svg>';
 }
-paintPicture(button,word){if(isFootball(word))button.innerHTML=soccerBallMarkup();else if(state.difficulty===2)button.innerHTML=pictureMarkup(word);else button.textContent=word[1]}
+paintPicture(button,word){
+const { soccerBallMarkup, isFootball, accessibleWord, placementPicture, pictureMarkup, paintPicture, state } = this.context;
+if(isFootball(word))button.innerHTML=soccerBallMarkup();else if(state.difficulty===2)button.innerHTML=pictureMarkup(word);else button.textContent=word[1]}
 }
