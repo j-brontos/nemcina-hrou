@@ -10,14 +10,14 @@ const cap=s=>s[0].toLocaleUpperCase('de-DE')+s.slice(1);
 export function coloredNumber(value,colorId,sentence=false){
  const n=numbers[value],c=colors.find(c=>c.de===colorId);
  if(!n||!c)throw new RangeError('Unknown number or color');
- return {id:'colored-'+value+'-'+colorId+(sentence?'-sentence':''),de:sentence?'Die '+cap(n.de)+' ist '+c.de+'.':'die '+c.adjective+' '+cap(n.de),cs:sentence?'Číslice '+value+' má barvu '+c.cs+'.':c.cs+' číslice '+value,art:'number:'+value+':'+colorId,value,colorId};
+ return {id:'colored-'+value+'-'+colorId+(sentence?'-sentence':''),de:sentence?'Die '+cap(n.de)+' ist '+c.de+'.':'die '+c.adjective+' '+cap(n.de),cs:sentence?'Číslice '+value+' je '+c.cs+'.':c.cs+' číslice '+value,art:'number:'+value+':'+colorId,value,colorId};
 }
 const pairs=['violett','rot','rosa','blau','grün','gelb'];
 export const combinations=pairs.map((c,i)=>coloredNumber(i+1,c));
 export const numberSentences=pairs.map((c,i)=>coloredNumber(i+1,c,true));
 export const favorites=activities.map(a=>({id:a.id+'-like',de:'Ich '+a.ich+' gern.',cs:a.likeCs,art:a.art}));
 export const questions=activities.map(a=>({id:a.id+'-question',de:cap(a.du)+' du gern?',cs:a.questionCs,art:a.art}));
-const entries=(kind,rows)=>rows.map(([de,cs,plural],i)=>({id:kind+'-'+(i+1),de,cs,plural,kind}));
+const entries=(kind,rows)=>rows.map(([de,cs,plural],i)=>({id:kind+'-'+encodeURIComponent(de.toLocaleLowerCase('de-DE')).replace(/%/g,'_'),de,cs,plural,kind}));
 export const phrases=entries('phrase',[
 ['Was machst du gern?','Co rád děláš?'],['Was macht das Kind?','Co dělá dítě?'],['Komm vorbei.','Přijď na návštěvu.'],['Dino ist hier.','Dino je tady.'],['alte Hexe','stará čarodějnice'],['Gute Nacht.','Dobrou noc.'],['schlafen gehen','jít spát'],['Die Wölfe kommen.','Vlci přicházejí.'],['Ich bin dran.','Jsem na řadě.'],['Du bist dran.','Jsi na řadě.'],['Gewonnen!','Vyhráno!'],['Super!','Super!'],['Toll!','Skvělé!'],['Welche Zahl ist das?','Jaké je to číslo?'],['Welche Farbe ist das?','Jaká je to barva?'],['Wie viele sind es?','Kolik jich je?'],['Zähle bis zehn.','Počítej do deseti.'],['Zeig mir die Fünf.','Ukaž mi pětku.'],['Male die Zwei rot.','Vybarvi dvojku červeně.'],['Renne!','Běhej!'],['Male!','Maluj!'],['Schaukle!','Houpej se!'],['Wippe!','Houpej se na vahadle!'],['Rutsche!','Klouzej se!'],['Klettere!','Lez!'],['Hüpfe!','Poskoč!'],['Klatsche!','Zatleskej!'],['Renne auf der Stelle!','Běhej na místě!'],['Hüpfe dreimal!','Třikrát poskoč!'],['Klatsche fünfmal!','Pětkrát zatleskej!']]);
 export const extra=entries('word',[
