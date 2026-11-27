@@ -1,11 +1,15 @@
 import { BaseGame } from "./BaseGame.js";
-import { speak, playWrong, giveFeedback, paintPicture, itemsForTopic, startMemory, flipCard, scheduleAdvance, next, el, shuffled, state } from "../application.js";
+
 export class MemoryGame extends BaseGame {
+constructor(context){super(context);}
+
 memoryCards=[];
 firstCard=null;
 lockMemory=false;
 pairsFound=0;
-startMemory(){ state.audioBusy=false;el("spokenText").classList.add("hide");el("positionBoard").classList.add("hide");el("sceneCanvas").classList.add("hide");el("choices").classList.remove("hide");
+startMemory(){
+const { speak, playWrong, giveFeedback, paintPicture, itemsForTopic, startMemory, flipCard, scheduleAdvance, next, el, shuffled, state } = this.context;
+ state.audioBusy=false;el("spokenText").classList.add("hide");el("positionBoard").classList.add("hide");el("sceneCanvas").classList.add("hide");el("choices").classList.remove("hide");
  const selected=shuffled(itemsForTopic(state.topicIndex)).slice(0,4);
  this.memoryCards=shuffled(selected.flatMap((w,i)=>[{word:w,id:i},{word:w,id:i}]));
  this.firstCard=null;this.lockMemory=false;this.pairsFound=0;
@@ -14,6 +18,8 @@ startMemory(){ state.audioBusy=false;el("spokenText").classList.add("hide");el("
  this.memoryCards.forEach((card,i)=>{const b=document.createElement("button");b.className="choice faceDown";b.textContent="❓";b.setAttribute("aria-label","OTOČ KARTU");b.addEventListener("click",()=>flipCard(i,b));area.appendChild(b)})
 }
 flipCard(i,b){
+const { speak, playWrong, giveFeedback, paintPicture, itemsForTopic, startMemory, flipCard, scheduleAdvance, next, el, shuffled, state } = this.context;
+
  const card=this.memoryCards[i];if(this.lockMemory||state.audioBusy||card.matched||card.open)return;
  card.open=true;paintPicture(b,card.word);b.classList.remove("faceDown");
  if(this.firstCard===null){speak(card.word[0]);this.firstCard=i;return}
