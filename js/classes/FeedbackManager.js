@@ -13,7 +13,7 @@ clearWrongHighlight();if(element){element.classList.add("wrong");this.activeWron
 playWrong(word,options={}){
 const { audioManager, stopAudio, speak, playErrorTone, clearWrongHighlight, markWrongHighlight, playWrong, giveFeedback, showWord, currentTaskSpeech, el, feedbackMessages, state } = this.context;
 
- // Tone -> selected answer -> original German error feedback -> original task.
+ // Spoken error -> selected answer -> original German error feedback -> original task.
  // A new answer can interrupt the sequence immediately.
  stopAudio();state.audioBusy=false;
  let sequenceToken=audioManager.playbackToken;
@@ -41,7 +41,7 @@ const { audioManager, stopAudio, speak, playErrorTone, clearWrongHighlight, mark
   if(word){sequenceToken=audioManager.playbackToken+1;speak(word,{once:true,quick:true,onEnd:playFeedback});}
   else playFeedback();
  };
- playErrorTone(playSelected);
+ sequenceToken=audioManager.playbackToken+1;speak("Falsch!",{once:true,quick:true,showWord:false,onEnd:playSelected});
  if(options.onEnd)options.onEnd();
 }
 giveFeedback(correct,options={}){
