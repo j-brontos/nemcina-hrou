@@ -1,0 +1,8 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {numbers,colors,activities,combinations,numberSentences,favorites,questions,phrases,extra,vocabulary,coloredNumber,newRhymes} from '../js/data/expandedVocabulary.js';
+import {learningMarkup} from '../js/data/learningArt.js';
+test('complete canonical catalog',()=>{assert.deepEqual(numbers.map(n=>n.value),Array.from({length:13},(_,i)=>i));assert.equal(colors.length,10);assert.equal(activities.length,7);assert.equal(combinations.length,6);assert.equal(numberSentences.length,6);assert.equal(favorites.length,7);assert.equal(questions.length,7);assert.equal(phrases.length,30);assert.equal(extra.length,27);assert.equal(new Set(vocabulary.map(e=>e.id)).size,vocabulary.length);assert.equal(new Set(vocabulary.map(e=>e.de.toLowerCase())).size,vocabulary.length);assert.ok(vocabulary.every(e=>e.cs))});
+test('all dynamic number/color combinations and art',()=>{for(const n of numbers)for(const c of colors){for(const sentence of [false,true]){const e=coloredNumber(n.value,c.de,sentence);assert.ok(learningMarkup(e.art));assert.ok(e.de.includes(sentence?c.de:c.adjective))}}assert.equal(coloredNumber(3,'rosa').de,'die rosa Drei');assert.equal(coloredNumber(12,'weiß',true).de,'Die Zwölf ist weiß.')});
+test('activities reuse distinct illustrations',()=>{assert.equal(new Set(activities.map(a=>learningMarkup(a.art))).size,7);for(const [i,a] of activities.entries()){assert.ok(learningMarkup(a.art));assert.equal(favorites[i].art,a.art);assert.equal(questions[i].art,a.art)}});
+test('rhymes preserve line counts and full text',()=>{assert.deepEqual(newRhymes.map(r=>r.lines.length),[8,6,8]);for(const r of newRhymes)assert.equal(r.speech,r.lines.join(' '))});

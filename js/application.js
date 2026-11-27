@@ -1,3 +1,4 @@
+import { colors, tuple, newTopics, newLevelTwo, newRhymes, vocabulary, numberSentences } from "./data/expandedVocabulary.js";
 import { ApplicationState } from "./classes/ApplicationState.js";
 import { AudioManager } from "./classes/AudioManager.js";
 import { FeedbackManager } from "./classes/FeedbackManager.js";
@@ -101,6 +102,9 @@ const levelTwoItems=[
  [["Guten Morgen, Dino!","🌅🦕"],["Ich bin glücklich.","😊❤️"],["Ich habe Hunger.","😋🍽️"],["Ich bin müde.","🥱🌙"],["Ich mag Äpfel.","❤️🍎"],["Die Sonne scheint.","☀️✨"]],
  [["der schwarze Hut","🎩⚫"],["der Fußball","⚽"],["das blaue Buch","📘🔵"],["der gelbe Regenschirm","☂️🟡"],["das große Haus","🏠⬆️"],["die grünen Schuhe","👟🟢"]]
 ];
+topics[0].items.push(...colors.filter(c=>!topics[0].items.some(w=>w[0]===c.de)).map(tuple));
+topics.push(...newTopics);
+levelTwoItems.push(...newLevelTwo);
 const el=id=>document.getElementById(id);
 function shuffled(items){const a=[...items];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
@@ -213,7 +217,7 @@ const placementPhrases={oben:"nach oben",unten:"nach unten",links:"nach links",r
 
 
 
-Object.assign(context,{audioManager,feedbackManager,pictureRenderer,vocabularyRepository,quizGame,exploreGame,memoryGame,sceneGame,positionGame,placementGame,application,stopAudio,audioFile,speak,playErrorTone,clearWrongHighlight,markWrongHighlight,playWrong,giveFeedback,soccerBallMarkup,isFootball,accessibleWord,placementPicture,pictureMarkup,paintPicture,itemsForTopic,render,choose,renderExplore,startMemory,flipCard,startScene,renderScene,chooseScene,nextScene,startPosition,renderPosition,positionSpeech,choosePosition,nextPosition,placementSpeech,startPlacement,renderPlacement,targetAt,selectPlacement,placeSelected,nextPlacement,cancelAdvance,scheduleAdvance,showWord,currentTaskSpeech,playInstructions,display,topicsUI,start,next,startPositionFromHome,setDifficulty,finishGame,showRhymes,topics,levelTwoItems,el,shuffled,gameInstructions,feedbackMessages,sceneLayouts,positionDirections,positionObjects,positionQuestions,placementObjects,placementPhrases,state});
+Object.assign(context,{audioManager,feedbackManager,pictureRenderer,vocabularyRepository,quizGame,exploreGame,memoryGame,sceneGame,positionGame,placementGame,application,stopAudio,audioFile,speak,playErrorTone,clearWrongHighlight,markWrongHighlight,playWrong,giveFeedback,soccerBallMarkup,isFootball,accessibleWord,placementPicture,pictureMarkup,paintPicture,itemsForTopic,render,choose,renderExplore,startMemory,flipCard,startScene,renderScene,chooseScene,nextScene,startPosition,renderPosition,positionSpeech,choosePosition,nextPosition,placementSpeech,startPlacement,renderPlacement,targetAt,selectPlacement,placeSelected,nextPlacement,cancelAdvance,scheduleAdvance,showWord,currentTaskSpeech,playInstructions,display,topicsUI,start,next,startPositionFromHome,setDifficulty,finishGame,showRhymes,topics,levelTwoItems,el,shuffled,gameInstructions,feedbackMessages,sceneLayouts,positionDirections,positionObjects,positionQuestions,placementObjects,placementPhrases,numberSentences,state});
 Object.defineProperty(context,'rhymes',{get:()=>rhymes});
 el("positionStart").addEventListener("click",()=>startPositionFromHome());
 
@@ -230,8 +234,9 @@ el("listen").addEventListener("click",()=>{clearTimeout(state.wrongAnswerWatchdo
  {icon:"👋",title:"GUTEN MORGEN",lines:["GUTEN MORGEN!","WIE GEHT ES DIR?","MIR GEHT ES GUT!","UND WIE GEHT ES DIR?"],speech:"Guten Morgen! Wie geht es dir? Mir geht es gut! Und wie geht es dir?"}
 ];
 
+rhymes.push(...newRhymes);
 el("rhymesButton").addEventListener("click",showRhymes);
 el("rhymeBack").addEventListener("click",()=>{stopAudio();display("home")});
 topicsUI();
 
-export { audioManager, feedbackManager, pictureRenderer, vocabularyRepository, quizGame, exploreGame, memoryGame, sceneGame, positionGame, placementGame, application, stopAudio, audioFile, speak, playErrorTone, clearWrongHighlight, markWrongHighlight, playWrong, giveFeedback, soccerBallMarkup, isFootball, accessibleWord, placementPicture, pictureMarkup, paintPicture, itemsForTopic, render, choose, renderExplore, startMemory, flipCard, startScene, renderScene, chooseScene, nextScene, startPosition, renderPosition, positionSpeech, choosePosition, nextPosition, placementSpeech, startPlacement, renderPlacement, targetAt, selectPlacement, placeSelected, nextPlacement, cancelAdvance, scheduleAdvance, showWord, currentTaskSpeech, playInstructions, display, topicsUI, start, next, startPositionFromHome, setDifficulty, finishGame, showRhymes, topics, levelTwoItems, el, shuffled, gameInstructions, feedbackMessages, sceneLayouts, positionDirections, positionObjects, positionQuestions, placementObjects, placementPhrases, rhymes };
+export { vocabulary, numberSentences, audioManager, feedbackManager, pictureRenderer, vocabularyRepository, quizGame, exploreGame, memoryGame, sceneGame, positionGame, placementGame, application, stopAudio, audioFile, speak, playErrorTone, clearWrongHighlight, markWrongHighlight, playWrong, giveFeedback, soccerBallMarkup, isFootball, accessibleWord, placementPicture, pictureMarkup, paintPicture, itemsForTopic, render, choose, renderExplore, startMemory, flipCard, startScene, renderScene, chooseScene, nextScene, startPosition, renderPosition, positionSpeech, choosePosition, nextPosition, placementSpeech, startPlacement, renderPlacement, targetAt, selectPlacement, placeSelected, nextPlacement, cancelAdvance, scheduleAdvance, showWord, currentTaskSpeech, playInstructions, display, topicsUI, start, next, startPositionFromHome, setDifficulty, finishGame, showRhymes, topics, levelTwoItems, el, shuffled, gameInstructions, feedbackMessages, sceneLayouts, positionDirections, positionObjects, positionQuestions, placementObjects, placementPhrases, rhymes };
