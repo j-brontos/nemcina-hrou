@@ -1,6 +1,8 @@
 import { BaseGame } from "./BaseGame.js";
-import { stopAudio, speak, playWrong, giveFeedback, placementPicture, placementSpeech, startPlacement, renderPlacement, targetAt, selectPlacement, placeSelected, nextPlacement, scheduleAdvance, next, finishGame, el, shuffled, positionDirections, placementObjects, placementPhrases, state } from "../application.js";
+
 export class PlacementGame extends BaseGame {
+constructor(context){super(context);}
+
 placementRound=[];
 placementStep=0;
 placementScore=0;
@@ -9,14 +11,20 @@ placementSelected=null;
 placementLocked=false;
 placementPointer=null;
 placementSpeech(){
+const { stopAudio, speak, playWrong, giveFeedback, placementPicture, placementSpeech, startPlacement, renderPlacement, targetAt, selectPlacement, placeSelected, nextPlacement, scheduleAdvance, next, finishGame, el, shuffled, positionDirections, placementObjects, placementPhrases, state } = this.context;
+
  const q=this.placementRound[this.placementStep],o=placementObjects[q.object];
  return "Lege "+o.article+" "+(state.difficulty===2?o.adjective+" ":"")+o.noun+" "+placementPhrases[q.dir]+".";
 }
 startPlacement(){
+const { stopAudio, speak, playWrong, giveFeedback, placementPicture, placementSpeech, startPlacement, renderPlacement, targetAt, selectPlacement, placeSelected, nextPlacement, scheduleAdvance, next, finishGame, el, shuffled, positionDirections, placementObjects, placementPhrases, state } = this.context;
+
  const questions=[];for(const dir of positionDirections)for(let i=0;i<placementObjects.length;i++)questions.push({dir:dir.id,object:i});
  this.placementRound=shuffled(questions).slice(0,10);this.placementStep=0;this.placementScore=0;renderPlacement();
 }
 renderPlacement(){
+const { stopAudio, speak, playWrong, giveFeedback, placementPicture, placementSpeech, startPlacement, renderPlacement, targetAt, selectPlacement, placeSelected, nextPlacement, scheduleAdvance, next, finishGame, el, shuffled, positionDirections, placementObjects, placementPhrases, state } = this.context;
+
  stopAudio();state.audioBusy=false;this.placementLocked=false;this.placementDone=false;this.placementSelected=null;this.placementPointer=null;
  el("positionBoard").classList.add("hide");el("sceneCanvas").classList.add("hide");el("choices").classList.add("hide");
  el("placementArea").classList.remove("hide");el("listen").classList.remove("hide");el("spokenText").classList.add("hide");
@@ -48,9 +56,15 @@ renderPlacement(){
  });
  speak(placementSpeech());
 }
-targetAt(x,y){return [...document.querySelectorAll(".placementTarget")].find(t=>{const r=t.getBoundingClientRect();return x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom})}
-selectPlacement(i,b){if(this.placementLocked||this.placementDone)return;this.placementSelected=i;el("placementChoices").querySelectorAll(".placementItem").forEach(x=>x.classList.toggle("selected",x===b))}
+targetAt(x,y){
+const { stopAudio, speak, playWrong, giveFeedback, placementPicture, placementSpeech, startPlacement, renderPlacement, targetAt, selectPlacement, placeSelected, nextPlacement, scheduleAdvance, next, finishGame, el, shuffled, positionDirections, placementObjects, placementPhrases, state } = this.context;
+return [...document.querySelectorAll(".placementTarget")].find(t=>{const r=t.getBoundingClientRect();return x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom})}
+selectPlacement(i,b){
+const { stopAudio, speak, playWrong, giveFeedback, placementPicture, placementSpeech, startPlacement, renderPlacement, targetAt, selectPlacement, placeSelected, nextPlacement, scheduleAdvance, next, finishGame, el, shuffled, positionDirections, placementObjects, placementPhrases, state } = this.context;
+if(this.placementLocked||this.placementDone)return;this.placementSelected=i;el("placementChoices").querySelectorAll(".placementItem").forEach(x=>x.classList.toggle("selected",x===b))}
 placeSelected(dir,target){
+const { stopAudio, speak, playWrong, giveFeedback, placementPicture, placementSpeech, startPlacement, renderPlacement, targetAt, selectPlacement, placeSelected, nextPlacement, scheduleAdvance, next, finishGame, el, shuffled, positionDirections, placementObjects, placementPhrases, state } = this.context;
+
  if(this.placementSelected===null||this.placementLocked||this.placementDone)return;
  const q=this.placementRound[this.placementStep],selected=this.placementSelected;
  const item=el("placementChoices").querySelector('[data-object="'+selected+'"]');
@@ -64,5 +78,7 @@ placeSelected(dir,target){
   setTimeout(()=>{this.placementLocked=false;if(item)item.classList.remove("selected");this.placementSelected=null},1500);playWrong(wrongWord,{highlight:target});
  }
 }
-nextPlacement(){if(!this.placementDone)return;this.placementStep++;if(this.placementStep<10)renderPlacement();else{state.score=this.placementScore;finishGame(10)}}
+nextPlacement(){
+const { stopAudio, speak, playWrong, giveFeedback, placementPicture, placementSpeech, startPlacement, renderPlacement, targetAt, selectPlacement, placeSelected, nextPlacement, scheduleAdvance, next, finishGame, el, shuffled, positionDirections, placementObjects, placementPhrases, state } = this.context;
+if(!this.placementDone)return;this.placementStep++;if(this.placementStep<10)renderPlacement();else{state.score=this.placementScore;finishGame(10)}}
 }
