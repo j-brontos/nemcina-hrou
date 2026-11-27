@@ -1,3 +1,4 @@
+import { learningMarkup } from "../data/learningArt.js";
 
 export class PictureRenderer {
 constructor(context){this.context=context;}
@@ -38,5 +39,5 @@ const { soccerBallMarkup, isFootball, accessibleWord, placementPicture, pictureM
 }
 paintPicture(button,word){
 const { soccerBallMarkup, isFootball, accessibleWord, placementPicture, pictureMarkup, paintPicture, state } = this.context;
-if(isFootball(word))button.innerHTML=soccerBallMarkup();else if(state.difficulty===2)button.innerHTML=pictureMarkup(word);else button.textContent=word[1]}
+const art=learningMarkup(word[1]);if(art){button.innerHTML=art;return}if(isFootball(word))button.innerHTML=soccerBallMarkup();else if(state.difficulty===2)button.innerHTML=pictureMarkup(word);else button.textContent=word[1]}
 }
