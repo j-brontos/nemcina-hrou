@@ -73,9 +73,8 @@ const { stopAudio, speak, playWrong, giveFeedback, placementPicture, placementSp
   el("stars").textContent="⭐ "+this.placementScore;el("bar").style.width=(this.placementStep+1)*10+"%";
   giveFeedback(true);scheduleAdvance();el("next").textContent=this.placementStep===9?"🏆 VÝSLEDEK":"➡️ DÁL";el("next").classList.remove("hide");
  }else{
-  this.placementLocked=true;
   const wrongWord=selected!==q.object?placementObjects[selected].noun:({oben:"oben",unten:"unten",links:"links",rechts:"rechts",mitte:"in der Mitte"})[dir];
-  setTimeout(()=>{this.placementLocked=false;if(item)item.classList.remove("selected");this.placementSelected=null},1500);playWrong(wrongWord,{highlight:target});
+  this.placementLocked=false;playWrong(wrongWord,{highlight:target});
  }
 }
 nextPlacement(){
