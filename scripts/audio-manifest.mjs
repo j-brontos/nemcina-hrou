@@ -2,6 +2,7 @@ globalThis.document={getElementById:()=>({addEventListener(){},replaceChildren()
 const a=await import('../js/application.js');
 const words=new Map();
 const add=(text,lang='de')=>{if(text)words.set(text,lang)};
+for(const e of a.vocabulary)add(e.de);
 for(const t of a.topics)for(const [w] of t.items)add(w);
 for(const t of a.levelTwoItems)for(const [w] of t)add(w);
 for(const q of a.positionQuestions){add(q.speech);add(q.sentence)}
