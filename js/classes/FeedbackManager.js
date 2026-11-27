@@ -28,18 +28,17 @@ const { audioManager, stopAudio, speak, playErrorTone, clearWrongHighlight, mark
  el("message").textContent=feedback.label;
  const replayTask=()=>{
   if(!active())return;
-  clearWrongHighlight();
-  if(task&&state.mode!=="memory"){showWord(task);speak(task,{once:true,quick:true});sequenceToken=audioManager.playbackToken}
-  else if(word)showWord(word);
+  if(task&&state.mode!=="memory"){showWord(task);sequenceToken=audioManager.playbackToken+1;speak(task,{once:true,quick:true,onEnd:()=>{if(active())clearWrongHighlight()}})}
+  else {if(word)showWord(word);clearWrongHighlight()}
  };
  const playFeedback=()=>{
   if(!active())return;
   el("message").textContent=feedback.label;
-  speak(feedback.feedback,{once:true,quick:true,showWord:false,onEnd:replayTask});sequenceToken=audioManager.playbackToken;
+  sequenceToken=audioManager.playbackToken+1;speak(feedback.feedback,{once:true,quick:true,showWord:false,onEnd:replayTask});
  };
  const playSelected=()=>{
   if(!active())return;
-  if(word){speak(word,{once:true,quick:true,onEnd:playFeedback});sequenceToken=audioManager.playbackToken;}
+  if(word){sequenceToken=audioManager.playbackToken+1;speak(word,{once:true,quick:true,onEnd:playFeedback});}
   else playFeedback();
  };
  playErrorTone(playSelected);
@@ -48,6 +47,7 @@ const { audioManager, stopAudio, speak, playErrorTone, clearWrongHighlight, mark
 giveFeedback(correct,options={}){
 const { audioManager, stopAudio, speak, playErrorTone, clearWrongHighlight, markWrongHighlight, playWrong, giveFeedback, showWord, currentTaskSpeech, el, feedbackMessages, state } = this.context;
 
+ if(correct)clearWrongHighlight();
  const kind=correct?"correct":"wrong",choices=feedbackMessages[kind];let index=Math.floor(Math.random()*choices.length);
  if(choices.length>1&&index===state.previousFeedback[kind])index=(index+1+Math.floor(Math.random()*(choices.length-1)))%choices.length;
  state.previousFeedback[kind]=index;const chosen=choices[index];
