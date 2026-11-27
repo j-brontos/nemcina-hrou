@@ -48,12 +48,12 @@ const { soccerBallMarkup, isFootball, accessibleWord, placementPicture, pictureM
  else if(text.includes("blatt")||text.includes("blätter"))shape='<path d="M50 10 Q90 30 77 63 Q65 87 50 92 Q25 74 16 53 Q12 30 50 10Z" fill="'+(color||"#df7434")+'"/><path d="M50 91 L50 26 M50 62 L27 44 M50 53 L73 34" stroke="#85502e" stroke-width="3" fill="none"/>';
  else if(text.includes("sonne"))shape='<circle cx="50" cy="50" r="25" fill="#f5c63b"/>'+Array.from({length:8},(_,i)=>{const a=i*Math.PI/4;return '<path d="M'+(50+33*Math.cos(a))+' '+(50+33*Math.sin(a))+' L'+(50+44*Math.cos(a))+' '+(50+44*Math.sin(a))+'" stroke="#e9aa27" stroke-width="6" stroke-linecap="round"/>'}).join("");
  else if(text.includes("regnet"))shape='<path d="M24 48 Q18 24 40 27 Q50 8 67 27 Q89 27 80 49Z" fill="#a5b6c7"/><path d="M28 62 L20 81 M50 62 L42 81 M72 62 L64 81" stroke="#3b8de2" stroke-width="7" stroke-linecap="round"/>';
- else if(text.includes("fußball")||text.includes("fussball"))return soccerBallMarkup();
+ else if(text.includes("fußball")||text.includes("fussball"))return this.soccerBallMarkup();
  else if(text.includes("buch"))shape='<path d="M19 17 H73 Q83 17 83 28 V84 H25 Q19 84 19 76Z" fill="'+(color||"#3979d9")+'"/><path d="M26 73 H83" stroke="#fff" stroke-width="5"/>';
  if(!shape){
  const parts=Array.from(new Intl.Segmenter("de",{granularity:"grapheme"}).segment(emoji),x=>x.segment);
- if(/\bklein[e|en|er|es]*\b/.test(text))shape=glyph(parts[0],50,76,45);
- else if(/\bgroß[e|en|er|es]*\b/.test(text))shape=glyph(parts[0],50,88,94);
+ if(/\bklein(?:e|en|er|es)?\b/.test(text))shape=glyph(parts[0],50,76,45);
+ else if(/\bgroß(?:e|en|er|es)?\b/.test(text))shape=glyph(parts[0],50,88,94);
  else if(parts.length>1)shape=glyph(parts[0],40,72,65)+glyph(parts.slice(1).join(""),76,90,30);
  else return '<span class="singleEmoji">'+emoji+'</span>';
  }
