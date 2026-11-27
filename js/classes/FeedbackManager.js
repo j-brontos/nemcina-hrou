@@ -1,10 +1,18 @@
-import { audioManager, stopAudio, speak, playErrorTone, clearWrongHighlight, markWrongHighlight, playWrong, giveFeedback, showWord, currentTaskSpeech, el, feedbackMessages, state } from "../application.js";
+
 export class FeedbackManager {
+constructor(context){this.context=context;}
+
 errorToneContext=null;
 activeWrongHighlight=null;
-clearWrongHighlight(){if(this.activeWrongHighlight){this.activeWrongHighlight.classList.remove("wrong");this.activeWrongHighlight=null}}
-markWrongHighlight(element){clearWrongHighlight();if(element){element.classList.add("wrong");this.activeWrongHighlight=element}}
+clearWrongHighlight(){
+const { audioManager, stopAudio, speak, playErrorTone, clearWrongHighlight, markWrongHighlight, playWrong, giveFeedback, showWord, currentTaskSpeech, el, feedbackMessages, state } = this.context;
+if(this.activeWrongHighlight){this.activeWrongHighlight.classList.remove("wrong");this.activeWrongHighlight=null}}
+markWrongHighlight(element){
+const { audioManager, stopAudio, speak, playErrorTone, clearWrongHighlight, markWrongHighlight, playWrong, giveFeedback, showWord, currentTaskSpeech, el, feedbackMessages, state } = this.context;
+clearWrongHighlight();if(element){element.classList.add("wrong");this.activeWrongHighlight=element}}
 playWrong(word,options={}){
+const { audioManager, stopAudio, speak, playErrorTone, clearWrongHighlight, markWrongHighlight, playWrong, giveFeedback, showWord, currentTaskSpeech, el, feedbackMessages, state } = this.context;
+
  // Tone -> selected answer -> original German error feedback -> original task.
  // A new answer can interrupt the sequence immediately.
  stopAudio();state.audioBusy=false;
@@ -38,6 +46,8 @@ playWrong(word,options={}){
  if(options.onEnd)options.onEnd();
 }
 giveFeedback(correct,options={}){
+const { audioManager, stopAudio, speak, playErrorTone, clearWrongHighlight, markWrongHighlight, playWrong, giveFeedback, showWord, currentTaskSpeech, el, feedbackMessages, state } = this.context;
+
  const kind=correct?"correct":"wrong",choices=feedbackMessages[kind];let index=Math.floor(Math.random()*choices.length);
  if(choices.length>1&&index===state.previousFeedback[kind])index=(index+1+Math.floor(Math.random()*(choices.length-1)))%choices.length;
  state.previousFeedback[kind]=index;const chosen=choices[index];
