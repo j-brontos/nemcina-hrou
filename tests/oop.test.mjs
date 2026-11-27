@@ -16,3 +16,16 @@ test('session reset clears previous game progress but retains settings',()=>{con
 
 test('enabled audio plays and invokes completion once',()=>{const old=globalThis.Audio;let player;globalThis.Audio=class{constructor(src){this.src=src;player=this}play(){return Promise.resolve()}pause(){}};try{let ended=0;const context={el:id=>({checked:id==='voice'}),showWord(){}};const audio=new AudioManager(context);context.stopAudio=audio.stopAudio.bind(audio);context.audioFile=audio.audioFile.bind(audio);audio.speak('rot',{onEnd:()=>ended++});assert.equal(player.src,'audio/rot.mp3');player.onended();player.onended();assert.equal(ended,1)}finally{globalThis.Audio=old}});
 test('stale audio callback cannot complete a new request',()=>{const old=globalThis.Audio;globalThis.Audio=class{play(){return Promise.resolve()}pause(){}};try{let ended=0;const context={el:id=>({checked:id==='voice'}),showWord(){}};const audio=new AudioManager(context);context.stopAudio=audio.stopAudio.bind(audio);context.audioFile=audio.audioFile.bind(audio);audio.speak('rot',{onEnd:()=>ended++});const stale=audio.audioPlayer.onended;audio.speak('blau');stale();assert.equal(ended,0)}finally{globalThis.Audio=old}});
+
+import {FeedbackManager} from '../js/classes/FeedbackManager.js';
+function feedbackFixture(voice){
+ const events=[],classes=new Set(),highlight={classList:{add:x=>classes.add(x),remove:x=>classes.delete(x)}};
+ const context={state:{mode:'quiz',previousFeedback:{wrong:-1,correct:-1}},el:id=>({checked:id==='voice'&&voice,classList:{contains:()=>false}}),showWord:w=>events.push(w),currentTaskSpeech:()=> 'task',feedbackMessages:{wrong:[{label:'wrong',feedback:'try again'}],correct:[{label:'ok',feedback:'good'}]}};
+ const audio=new AudioManager(context),feedback=new FeedbackManager(context);
+ Object.assign(context,{audioManager:audio,feedbackManager:feedback});
+ for(const [instance,names] of [[audio,['stopAudio','audioFile','speak','playErrorTone']],[feedback,['clearWrongHighlight','markWrongHighlight','playWrong','giveFeedback']]])for(const name of names)context[name]=instance[name].bind(instance);
+ context.playErrorTone=cb=>cb();
+ return {context,audio,feedback,events,classes,highlight};
+}
+test('muted feedback repeats task and clears highlight',()=>{const f=feedbackFixture(false);f.feedback.playWrong('wrong word',{highlight:f.highlight});assert.ok(f.events.includes('task'));assert.equal(f.classes.has('wrong'),false)});
+test('audible feedback retains highlight until repeated task ends',()=>{const old=globalThis.Audio;const played=[];globalThis.Audio=class{constructor(src){played.push(src)}play(){return Promise.resolve()}pause(){}};try{const f=feedbackFixture(true);f.feedback.playWrong('rot',{highlight:f.highlight});assert.equal(f.classes.has('wrong'),true);f.audio.audioPlayer.onended();f.audio.audioPlayer.onended();assert.equal(f.classes.has('wrong'),true);f.audio.audioPlayer.onended();assert.equal(f.classes.has('wrong'),false);assert.deepEqual(played,['audio/rot.mp3','audio/try_20again.mp3','audio/task.mp3'])}finally{globalThis.Audio=old}});
