@@ -22,13 +22,15 @@ jobs:
         uses: actions/checkout@v4
       - name: Install natural German speech generator
         run: python3 -m pip install --user --break-system-packages edge-tts
+      - name: Remove legacy speech assets
+        run: rm -rf audio
       - name: Restore cached neural MP3 files
         uses: actions/cache/restore@v4
         with:
           path: audio
-          key: german-katja-neural-v4-${{ hashFiles('js/application.js', 'scripts/audio-manifest.mjs') }}
+          key: german-katja-neural-v5-${{ hashFiles('js/application.js', 'scripts/audio-manifest.mjs') }}
           restore-keys: |
-            german-katja-neural-v4-
+            german-katja-neural-v5-
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -74,7 +76,7 @@ jobs:
         uses: actions/cache/save@v4
         with:
           path: audio
-          key: german-katja-neural-v4-${{ hashFiles('js/application.js', 'scripts/audio-manifest.mjs') }}
+          key: german-katja-neural-v5-${{ hashFiles('js/application.js', 'scripts/audio-manifest.mjs') }}
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload site
