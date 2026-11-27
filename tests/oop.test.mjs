@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { BaseGame } from '../js/classes/BaseGame.js';
+import { AudioManager } from '../js/classes/AudioManager.js';
+import { VocabularyRepository } from '../js/classes/VocabularyRepository.js';
+import { QuizGame } from '../js/classes/QuizGame.js';
+test('game receives injected dependencies',()=>{const context={};const game=new QuizGame(context);assert.ok(game instanceof BaseGame);assert.equal(game.context,context)});
+test('audio file naming preserves German characters',()=>{const audio=new AudioManager({});assert.equal(audio.audioFile('der Fußball'),'audio/der_20Fu_C3_9Fball.mp3')});
+test('vocabulary selects difficulty',()=>{const state={difficulty:1};const repo=new VocabularyRepository({state,topics:[{items:['one']}],levelTwoItems:[['two']]});assert.deepEqual(repo.itemsForTopic(0),['one']);state.difficulty=2;assert.deepEqual(repo.itemsForTopic(0),['two'])});
+test('wrong answer allows immediate correct retry',()=>{const state={done:false,audioBusy:false,score:0,step:0,round:[1,2]};const node=()=>({classList:{add(){},remove(){}},children:[]});const nodes=new Map();const el=id=>{if(!nodes.has(id))nodes.set(id,node());return nodes.get(id)};const game=new QuizGame({state,el,playWrong(){},giveFeedback(){},scheduleAdvance(){}});game.choose(node(),false,['a'],['b']);game.choose(node(),true,['a'],['a']);assert.equal(state.score,1);assert.equal(state.done,true)});
