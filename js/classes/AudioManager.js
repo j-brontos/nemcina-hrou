@@ -19,13 +19,13 @@ const { feedbackManager, stopAudio, audioFile, speak, playErrorTone, showWord, s
  let completed=false;const finish=()=>{if(completed||token!==this.playbackToken)return;completed=true;if(options.onEnd)options.onEnd()};
  if(!el("voice").checked){finish();return}
  const speed=el("slow").checked?0.78:1,twice=el("repeat").checked&&!options.once;
- function playOnce(remaining){
+ const playOnce=(remaining)=>{
   if(token!==this.playbackToken)return;
   const player=new Audio(audioFile(word));this.audioPlayer=player;player.playbackRate=options.quick?Math.min(1.2,speed*1.15):speed;player.preservesPitch=true;
   player.onended=()=>{if(token!==this.playbackToken)return;if(remaining>1){this.repeatTimer=setTimeout(()=>playOnce(remaining-1),350)}else finish()};
   player.onerror=()=>{if(token===this.playbackToken){el("message").textContent="🔇 ZVUK NENÍ DOSTUPNÝ";finish()}};
   try{const promise=player.play();if(promise&&promise.catch)promise.catch(()=>{if(token===this.playbackToken){el("message").textContent="🔇 KLEPNI NA 🔊";finish()}})}catch(e){finish()}
- }
+ };
  playOnce(twice?2:1);
 }
 playErrorTone(onEnd){
