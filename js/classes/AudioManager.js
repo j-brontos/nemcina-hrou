@@ -1,11 +1,19 @@
-import { feedbackManager, stopAudio, audioFile, speak, playErrorTone, showWord, start, el, state } from "../application.js";
+
 export class AudioManager {
+constructor(context){this.context=context;}
+
 audioPlayer=null;
 repeatTimer=null;
 playbackToken=0;
-stopAudio(){this.playbackToken++;if(this.repeatTimer){clearTimeout(this.repeatTimer);this.repeatTimer=null}if(this.audioPlayer){this.audioPlayer.pause();this.audioPlayer.onended=null;this.audioPlayer=null}}
-audioFile(word){return "audio/"+encodeURIComponent(word).replace(/[!'()*]/g,c=>"%"+c.charCodeAt(0).toString(16).toUpperCase()).replace(/%/g,"_")+".mp3"}
+stopAudio(){
+const { feedbackManager, stopAudio, audioFile, speak, playErrorTone, showWord, start, el, state } = this.context;
+this.playbackToken++;if(this.repeatTimer){clearTimeout(this.repeatTimer);this.repeatTimer=null}if(this.audioPlayer){this.audioPlayer.pause();this.audioPlayer.onended=null;this.audioPlayer=null}}
+audioFile(word){
+const { feedbackManager, stopAudio, audioFile, speak, playErrorTone, showWord, start, el, state } = this.context;
+return "audio/"+encodeURIComponent(word).replace(/[!'()*]/g,c=>"%"+c.charCodeAt(0).toString(16).toUpperCase()).replace(/%/g,"_")+".mp3"}
 speak(word,options={}){
+const { feedbackManager, stopAudio, audioFile, speak, playErrorTone, showWord, start, el, state } = this.context;
+
  stopAudio();const token=this.playbackToken;
  if(options.showWord!==false)showWord(word);
  let completed=false;const finish=()=>{if(completed||token!==this.playbackToken)return;completed=true;if(options.onEnd)options.onEnd()};
@@ -21,6 +29,8 @@ speak(word,options={}){
  playOnce(twice?2:1);
 }
 playErrorTone(onEnd){
+const { feedbackManager, stopAudio, audioFile, speak, playErrorTone, showWord, start, el, state } = this.context;
+
  // Reliable single short chime; do not block speech if Web Audio is unavailable.
  const token=this.playbackToken;
  let completed=false;
