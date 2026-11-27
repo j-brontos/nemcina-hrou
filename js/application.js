@@ -9,21 +9,22 @@ import { SceneGame } from "./classes/SceneGame.js";
 import { PositionGame } from "./classes/PositionGame.js";
 import { PlacementGame } from "./classes/PlacementGame.js";
 import { Application } from "./classes/Application.js";
+const context={};
 export const state={difficulty:1,topicIndex:0,round:[],step:0,score:0,done:false,mode:"quiz",speechToken:0,audioBusy:false,wrongAnswerWatchdog:null,advanceTimer:null,previousFeedback:{correct:-1,wrong:-1}};
 
 "use strict";
 
-const audioManager = new AudioManager();
-const feedbackManager = new FeedbackManager();
-const pictureRenderer = new PictureRenderer();
-const vocabularyRepository = new VocabularyRepository();
-const quizGame = new QuizGame();
-const exploreGame = new ExploreGame();
-const memoryGame = new MemoryGame();
-const sceneGame = new SceneGame();
-const positionGame = new PositionGame();
-const placementGame = new PlacementGame();
-const application = new Application();
+const audioManager = new AudioManager(context);
+const feedbackManager = new FeedbackManager(context);
+const pictureRenderer = new PictureRenderer(context);
+const vocabularyRepository = new VocabularyRepository(context);
+const quizGame = new QuizGame(context);
+const exploreGame = new ExploreGame(context);
+const memoryGame = new MemoryGame(context);
+const sceneGame = new SceneGame(context);
+const positionGame = new PositionGame(context);
+const placementGame = new PlacementGame(context);
+const application = new Application(context);
 const stopAudio = audioManager.stopAudio.bind(audioManager);
 const audioFile = audioManager.audioFile.bind(audioManager);
 const speak = audioManager.speak.bind(audioManager);
@@ -211,6 +212,8 @@ const placementPhrases={oben:"nach oben",unten:"nach unten",links:"nach links",r
 
 
 
+Object.assign(context,{audioManager,feedbackManager,pictureRenderer,vocabularyRepository,quizGame,exploreGame,memoryGame,sceneGame,positionGame,placementGame,application,stopAudio,audioFile,speak,playErrorTone,clearWrongHighlight,markWrongHighlight,playWrong,giveFeedback,soccerBallMarkup,isFootball,accessibleWord,placementPicture,pictureMarkup,paintPicture,itemsForTopic,render,choose,renderExplore,startMemory,flipCard,startScene,renderScene,chooseScene,nextScene,startPosition,renderPosition,positionSpeech,choosePosition,nextPosition,placementSpeech,startPlacement,renderPlacement,targetAt,selectPlacement,placeSelected,nextPlacement,cancelAdvance,scheduleAdvance,showWord,currentTaskSpeech,playInstructions,display,topicsUI,start,next,startPositionFromHome,setDifficulty,finishGame,showRhymes,topics,levelTwoItems,el,shuffled,gameInstructions,feedbackMessages,sceneLayouts,positionDirections,positionObjects,positionQuestions,placementObjects,placementPhrases,state});
+Object.defineProperty(context,'rhymes',{get:()=>rhymes});
 el("positionStart").addEventListener("click",()=>startPositionFromHome());
 
 
