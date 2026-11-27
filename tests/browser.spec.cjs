@@ -1,7 +1,7 @@
 const {test,expect}=require('@playwright/test');
 for(const level of [1,2])for(const mode of ['quiz','explore','memory','scene','position','placement'])test(mode+' level '+level,async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto('/');await expect(page.locator('#topics .topic')).toHaveCount(9);
+ await page.goto('/');await expect(page.locator('#topics .topic')).toHaveCount(11);
  await page.locator('#level'+level).click();
  await page.locator('[data-mode="'+mode+'"]').click();
  if(['position','placement'].includes(mode))await page.locator('#positionStart').click();else await page.locator('#topics .topic').first().click();
@@ -28,3 +28,13 @@ for(const level of [1,2])test('quiz immediate retry level '+level,async({page})=
  await expect(page.locator('#stars')).toHaveText('⭐ 1');
  await expect(page.locator('#count')).toHaveText('2 / 6',{timeout:6000});
 });
+
+for(const level of [1,2])for(const mode of ['quiz','explore','memory','scene'])for(const topic of [9,10])test('new topic '+topic+' '+mode+' '+level,async({page})=>{
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));await page.goto('/');
+ await page.locator('#level'+level).click();await page.locator('[data-mode="'+mode+'"]').click();await page.locator('#topics .topic').nth(topic).click();
+ await expect(page.locator('#game')).toBeVisible();
+ if(mode==='memory')await page.locator('#choices button').first().click();
+ await expect(page.locator('#game svg.learningArt').first()).toBeVisible();
+ expect(errors).toEqual([]);
+});
+test('three new rhymes appear',async({page})=>{await page.goto('/');await page.locator('#rhymesButton').click();await expect(page.locator('.rhymeCard')).toHaveCount(7);await expect(page.locator('.rhymeCard').nth(4).locator('.rhymeLine')).toHaveCount(8);await expect(page.locator('.rhymeCard').nth(5).locator('.rhymeLine')).toHaveCount(6);await expect(page.locator('.rhymeCard').nth(6).locator('.rhymeLine')).toHaveCount(8)});
