@@ -1,4 +1,5 @@
-globalThis.document={getElementById:()=>({addEventListener(){},replaceChildren(){},appendChild(){}}),querySelectorAll:()=>[],createElement:()=>({append(){},addEventListener(){}})};
+const node=()=>({addEventListener(){},replaceChildren(){},appendChild(){},append(){},setAttribute(){},classList:{add(){},remove(){},toggle(){}},style:{setProperty(){}}});
+globalThis.document={getElementById:node,querySelectorAll:()=>[],createElement:node};
 const a=await import('../js/application.js');
 const words=new Map();
 const add=(text,lang='de')=>{if(text)words.set(text,lang)};
