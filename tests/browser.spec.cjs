@@ -10,3 +10,21 @@ for(const level of [1,2])for(const mode of ['quiz','explore','memory','scene','p
  await page.locator('#back').click();await expect(page.locator('#home')).toBeVisible();
  expect(errors).toEqual([]);
 });
+
+for(const level of [1,2])test('quiz immediate retry level '+level,async({page})=>{
+ await page.goto('/');
+ await page.locator('#level'+level).click();
+ await page.locator('[data-mode="quiz"]').click();
+ await page.locator('#topics .topic').first().click();
+ const task=await page.evaluate(async()=>{const {state}=await import('/js/application.js');return state.round[state.step][0]});
+ const choices=page.locator('#choices button');
+ const labels=await choices.evaluateAll(nodes=>nodes.map(n=>n.getAttribute('aria-label')));
+ const correct=labels.findIndex(l=>l==='OBRÁZEK '+task||l==='OBRÁZEK fotbalový míč – '+task);
+ expect(correct).toBeGreaterThanOrEqual(0);
+ const wrong=labels.findIndex((_,i)=>i!==correct);
+ await choices.nth(wrong).click();
+ await expect(choices.nth(wrong)).toHaveClass(/wrong/);
+ await choices.nth(correct).click();
+ await expect(page.locator('#stars')).toHaveText('⭐ 1');
+ await expect(page.locator('#count')).toHaveText('2 / 6',{timeout:6000});
+});
