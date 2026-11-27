@@ -26,12 +26,12 @@ const { feedbackManager, stopAudio, audioFile, speak, playErrorTone, showWord, s
  const speed=el("slow").checked?0.78:1,twice=el("repeat").checked&&!options.once;
  const playOnce=(remaining)=>{
   if(token!==this.playbackToken)return;
-  const player=new Audio(audioFile(word));this.audioPlayer=player;player.playbackRate=options.quick?Math.min(1.2,speed*1.15):speed;player.preservesPitch=true;
+  const player=new Audio(audioFile(word));this.audioPlayer=player;player.playbackRate=options.quick?Math.min(1.25,speed*(typeof options.quick==='number'?options.quick:1.15)):speed;player.preservesPitch=true;
   let settled=false,fallbackStarted=false;
   const next=()=>{if(settled||token!==this.playbackToken)return;settled=true;this.speechUtterance=null;if(remaining>1){this.repeatTimer=setTimeout(()=>playOnce(remaining-1),350)}else finish()};
   const unavailable=()=>{if(settled||token!==this.playbackToken)return;el("message").textContent="🔇 KLEPNI NA 🔊";next()};
   const fallback=()=>{if(settled||fallbackStarted||token!==this.playbackToken)return;fallbackStarted=true;player.onended=null;player.onerror=null;player.pause();
-   try{const synth=globalThis.speechSynthesis;if(!synth||!globalThis.SpeechSynthesisUtterance){unavailable();return}const utterance=new SpeechSynthesisUtterance(word);utterance.lang="de-DE";utterance.rate=options.quick?Math.min(1.2,speed*1.15):speed;const voices=synth.getVoices();const voice=voices.find(v=>v.lang==="de-DE"&&v.localService)||voices.find(v=>v.lang.startsWith("de"));if(voice)utterance.voice=voice;this.speechUtterance=utterance;utterance.onend=next;utterance.onerror=unavailable;synth.speak(utterance)}catch(e){unavailable()}
+   try{const synth=globalThis.speechSynthesis;if(!synth||!globalThis.SpeechSynthesisUtterance){unavailable();return}const utterance=new SpeechSynthesisUtterance(word);utterance.lang="de-DE";utterance.rate=options.quick?Math.min(1.25,speed*(typeof options.quick==='number'?options.quick:1.15)):speed;const voices=synth.getVoices();const voice=voices.find(v=>v.lang==="de-DE"&&v.localService)||voices.find(v=>v.lang.startsWith("de"));if(voice)utterance.voice=voice;this.speechUtterance=utterance;utterance.onend=next;utterance.onerror=unavailable;synth.speak(utterance)}catch(e){unavailable()}
   };
   player.onended=next;player.onerror=fallback;
   try{const promise=player.play();if(promise&&promise.catch)promise.catch(fallback)}catch(e){fallback()}
