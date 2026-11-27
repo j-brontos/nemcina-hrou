@@ -26,44 +26,33 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           path: audio
-          key: german-katja-neural-v3-${{ hashFiles('index.html') }}
+          key: german-katja-neural-v4-${{ hashFiles('js/application.js', 'scripts/audio-manifest.mjs') }}
           restore-keys: |
-            german-katja-neural-v3-
+            german-katja-neural-v4-
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - name: Generate German MP3 files
         shell: bash
         run: |
+          node --experimental-default-type=module scripts/audio-manifest.mjs > /tmp/audio-manifest.json
           python3 - <<'PY'
-          import asyncio, pathlib, re, urllib.parse
+          import asyncio, pathlib, json
           import edge_tts
-          source = pathlib.Path("index.html").read_text(encoding="utf-8")
-          words = set(re.findall(r'\["([^"]+)","[^"]+"\]', source))
-          words.update(["Super!", "Sehr gut!"])
-          words.update(re.findall(r'speech:"([^"]+)"', source))
-          words.update(re.findall(r'sentence:"([^"]+)"', source))
-          words.update(re.findall(r'feedback:"([^"]+)"', source))
-          for block in re.findall(r'lines:\[([^\]]+)\]', source):
-              words.update(re.findall(r'"([^"]+)"', block))
-          # Placement instructions are assembled dynamically in JavaScript.
-          # Pre-generate all combinations for both difficulty levels.
-          objects = re.findall(r'\{icon:"[^"]+",noun:"([^"]+)",article:"([^"]+)",adjective:"([^"]+)"\}', source)
-          directions = ["nach oben", "nach unten", "nach links", "nach rechts", "in die Mitte"]
-          for noun, article, adjective in objects:
-              for direction in directions:
-                  words.add(f"Lege {article} {noun} {direction}.")
-                  words.add(f"Lege {article} {adjective} {noun} {direction}.")
-          words.update(["oben", "unten", "links", "rechts", "in der Mitte"])
+          words = json.load(open('/tmp/audio-manifest.json'))
           target = pathlib.Path("audio")
           target.mkdir(exist_ok=True)
-          async def generate(word, semaphore):
-              filename = urllib.parse.quote(word, safe="").replace("%", "_") + ".mp3"
-              output = target / filename
+          async def generate(item, semaphore):
+              word = item['text']
+              output = pathlib.Path(item['path'])
+              voice = "cs-CZ-VlastaNeural" if item['lang'] == 'cs' else "de-DE-KatjaNeural"
               if output.exists() and output.stat().st_size > 1000:
                   return
               async with semaphore:
                   for attempt in range(4):
                       try:
                           await asyncio.wait_for(
-                              edge_tts.Communicate(word, "de-DE-KatjaNeural", rate="-10%").save(str(output)),
+                              edge_tts.Communicate(word, voice, rate="-10%").save(str(output)),
                               timeout=45
                           )
                           if output.stat().st_size > 1000:
@@ -76,15 +65,16 @@ jobs:
                   raise RuntimeError(f"Cannot generate natural voice for {word}")
           async def main():
               semaphore = asyncio.Semaphore(4)
-              await asyncio.gather(*(generate(word, semaphore) for word in sorted(words)))
+              await asyncio.gather(*(generate(word, semaphore) for word in words))
           asyncio.run(main())
-          print(f"Natural Katja Neural MP3 ready: {len(words)} phrases")
+          assert all(pathlib.Path(item["path"]).stat().st_size > 1000 for item in words)
+          print(f"Natural neural MP3 ready: {len(words)} phrases")
           PY
       - name: Cache natural German audio
         uses: actions/cache/save@v4
         with:
           path: audio
-          key: german-katja-neural-v3-${{ hashFiles('index.html') }}
+          key: german-katja-neural-v4-${{ hashFiles('js/application.js', 'scripts/audio-manifest.mjs') }}
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload site
