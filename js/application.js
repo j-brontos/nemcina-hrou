@@ -1,3 +1,4 @@
+import { ApplicationState } from "./classes/ApplicationState.js";
 import { AudioManager } from "./classes/AudioManager.js";
 import { FeedbackManager } from "./classes/FeedbackManager.js";
 import { PictureRenderer } from "./classes/PictureRenderer.js";
@@ -10,7 +11,7 @@ import { PositionGame } from "./classes/PositionGame.js";
 import { PlacementGame } from "./classes/PlacementGame.js";
 import { Application } from "./classes/Application.js";
 const context={};
-export const state={difficulty:1,topicIndex:0,round:[],step:0,score:0,done:false,mode:"quiz",speechToken:0,audioBusy:false,wrongAnswerWatchdog:null,advanceTimer:null,previousFeedback:{correct:-1,wrong:-1}};
+export const state=new ApplicationState();
 
 "use strict";
 
