@@ -10,3 +10,6 @@ test('vocabulary selects difficulty',()=>{const state={difficulty:1};const repo=
 test('wrong answer allows immediate correct retry',()=>{const state={done:false,audioBusy:false,score:0,step:0,round:[1,2]};const node=()=>({classList:{add(){},remove(){}},children:[]});const nodes=new Map();const el=id=>{if(!nodes.has(id))nodes.set(id,node());return nodes.get(id)};const game=new QuizGame({state,el,playWrong(){},giveFeedback(){},scheduleAdvance(){}});game.choose(node(),false,['a'],['b']);game.choose(node(),true,['a'],['a']);assert.equal(state.score,1);assert.equal(state.done,true)});
 
 test('destroy cancels pending game callbacks',async()=>{const game=new BaseGame({});let called=false;game.defer(()=>{called=true},10);game.destroy();await new Promise(resolve=>setTimeout(resolve,30));assert.equal(called,false);assert.equal(game.timers.size,0)});
+
+import {ApplicationState} from '../js/classes/ApplicationState.js';
+test('session reset clears previous game progress but retains settings',()=>{const state=new ApplicationState();state.difficulty=2;state.mode='quiz';state.score=5;state.step=4;state.done=true;state.reset([['rot']]);assert.equal(state.score,0);assert.equal(state.step,0);assert.equal(state.done,false);assert.equal(state.difficulty,2);assert.deepEqual(state.round,[['rot']])});
