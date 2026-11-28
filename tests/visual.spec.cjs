@@ -27,6 +27,13 @@ async function picturesReady(page) {
 }
 async function screenFits(page) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  expect(await page.locator('#game button .learningArt:visible').evaluateAll(images =>
+    images.filter(image => {
+      const bounds = image.closest('button').getBoundingClientRect();
+      const art = image.getBoundingClientRect();
+      return art.width < 1 || art.height < 1 || art.top < bounds.top - 1 || art.left < bounds.left - 1 ||
+        art.bottom > bounds.bottom + 1 || art.right > bounds.right + 1;
+    }).map(image => image.closest('button').getAttribute('aria-label')))).toEqual([]);
   expect(await page.locator('button:visible,summary:visible').evaluateAll(nodes =>
     nodes.filter(n => n.offsetWidth < 44 || n.offsetHeight < 44 || n.scrollWidth > n.clientWidth + 2)
          .map(n => n.id || n.getAttribute('aria-label') || n.textContent))).toEqual([]);
