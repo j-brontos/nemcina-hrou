@@ -28,14 +28,14 @@ const { stopAudio, speak, playWrong, giveFeedback, placementPicture, placementSp
  stopAudio();state.audioBusy=false;this.placementLocked=false;this.placementDone=false;this.placementSelected=null;this.placementPointer=null;
  el("positionBoard").classList.add("hide");el("sceneCanvas").classList.add("hide");el("choices").classList.add("hide");
  el("placementArea").classList.remove("hide");el("listen").classList.remove("hide");el("spokenText").classList.add("hide");
- el("heading").textContent="🧩 KAM TO PATŘÍ?";
- el("count").textContent=(this.placementStep+1)+" / 10";el("stars").textContent="⭐ "+this.placementScore;
- el("bar").style.width=this.placementStep*10+"%";el("next").classList.add("hide");el("message").textContent="👂 POSLOUCHEJ A PŘESUŇ";
+ el("heading").textContent="KAM TO PATŘÍ?";
+ el("count").textContent=(this.placementStep+1)+" / 10";el("stars").textContent=this.placementScore;
+ el("bar").style.width=this.placementStep*10+"%";el("next").classList.add("hide");el("message").textContent="POSLOUCHEJ A PŘESUŇ";
  const q=this.placementRound[this.placementStep],board=el("placementBoard"),choices=el("placementChoices");
  board.replaceChildren();choices.replaceChildren();
  positionDirections.forEach(d=>{
   const target=document.createElement("button");target.className="positionCell placementTarget";target.dataset.dir=d.id;
-  target.setAttribute("aria-label",d.label);target.textContent="⬚";
+  target.setAttribute("aria-label",d.label);target.textContent=({oben:"↑",unten:"↓",links:"←",rechts:"→",mitte:"•"})[d.id];
   target.addEventListener("click",()=>placeSelected(d.id,target));
   board.appendChild(target);
  });
@@ -44,7 +44,7 @@ const { stopAudio, speak, playWrong, giveFeedback, placementPicture, placementSp
   const b=document.createElement("button");b.className="placementItem";b.innerHTML=placementPicture(placementObjects[i]);
   b.dataset.object=String(i);b.setAttribute("aria-label",placementObjects[i].noun==="Fußball"?"fotbalový míč – Fußball":placementObjects[i].noun);
   b.addEventListener("click",()=>selectPlacement(i,b));
-  b.addEventListener("pointerdown",e=>{if(this.placementLocked||this.placementDone)return;this.placementPointer={id:e.pointerId,x:e.clientX,y:e.clientY,i,button:b,moved:false};});
+  b.addEventListener("pointerdown",e=>{if(this.placementLocked||this.placementDone)return;b.setPointerCapture(e.pointerId);this.placementPointer={id:e.pointerId,x:e.clientX,y:e.clientY,i,button:b,moved:false};});
   b.addEventListener("pointermove",e=>{if(!this.placementPointer||this.placementPointer.id!==e.pointerId)return;
    if(Math.hypot(e.clientX-this.placementPointer.x,e.clientY-this.placementPointer.y)>12){this.placementPointer.moved=true;this.placementSelected=i;b.classList.add("selected");}
    if(this.placementPointer.moved){document.querySelectorAll(".placementTarget").forEach(t=>t.classList.toggle("hover",!!targetAt(e.clientX,e.clientY)&&t===targetAt(e.clientX,e.clientY)));}});
@@ -70,8 +70,8 @@ const { stopAudio, speak, playWrong, giveFeedback, placementPicture, placementSp
  const item=el("placementChoices").querySelector('[data-object="'+selected+'"]');
  if(selected===q.object&&dir===q.dir){
   this.placementDone=true;this.placementScore++;target.innerHTML=placementPicture(placementObjects[selected]);target.classList.add("correct");
-  el("stars").textContent="⭐ "+this.placementScore;el("bar").style.width=(this.placementStep+1)*10+"%";
-  giveFeedback(true);scheduleAdvance();el("next").textContent=this.placementStep===9?"🏆 VÝSLEDEK":"➡️ DÁL";el("next").classList.remove("hide");
+  el("stars").textContent=this.placementScore;el("bar").style.width=(this.placementStep+1)*10+"%";
+  giveFeedback(true);scheduleAdvance();el("next").textContent=this.placementStep===9?"VÝSLEDEK":"DÁL";el("next").classList.remove("hide");
  }else{
   const wrongWord=selected!==q.object?placementObjects[selected].noun:({oben:"oben",unten:"unten",links:"links",rechts:"rechts",mitte:"in der Mitte"})[dir];
   this.placementLocked=false;playWrong(wrongWord,{highlight:target});

@@ -25,7 +25,7 @@ for(const level of [1,2])test('quiz immediate retry level '+level,async({page})=
  await choices.nth(wrong).click();
  await expect(choices.nth(wrong)).toHaveClass(/wrong/);
  await choices.nth(correct).click();
- await expect(page.locator('#stars')).toHaveText('⭐ 1');
+ await expect(page.locator('#stars')).toHaveText('1');
  await expect(page.locator('#count')).toHaveText('2 / 6',{timeout:6000});
 });
 

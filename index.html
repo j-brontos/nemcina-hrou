@@ -1,7 +1,75 @@
 <!doctype html>
-<html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#5865d8"><title>NĚMČINA HROU</title>
-<link rel="stylesheet" href="css/main.css"></head><body><main class="app"><header class="hero"><h1><img class="heroMascot" src="assets/images/ich-bin-dino.webp" alt=""> NĚMČINA HROU</h1><p>POSLOUCHEJ • KOUKEJ • HRAJ SI</p></header>
-<section id="home"><div class="panel"><h2>🎮 VYBER SI HRU</h2><div class="modes"><button class="mode active" data-mode="quiz"><img class="modeArt" src="assets/images/roter-apfel.webp" alt=""><small>POSLOUCHEJ A UKAŽ</small></button><button class="mode" data-mode="explore"><img class="modeArt" src="assets/images/blaues-buch.webp" alt=""><small>PROHLÍŽEJ A POSLOUCHEJ</small></button><button class="mode" data-mode="memory"><img class="modeArt" src="assets/images/bunter-schmetterling.webp" alt=""><small>PEXESO</small></button><button class="mode" data-mode="scene"><img class="modeArt" src="assets/images/kinderzimmer.webp" alt=""><small>NAJDI V OBRÁZKU</small></button><button class="mode" data-mode="position"><img class="modeArt" src="assets/images/gruener-baum.webp" alt=""><small>KDE JE CO?</small></button><button class="mode" data-mode="placement"><img class="modeArt" src="assets/images/fussball.webp" alt=""><small>KAM TO PATŘÍ?</small></button></div><h2>🎚️ OBTÍŽNOST</h2><div class="levels" role="group" aria-label="VÝBĚR OBTÍŽNOSTI"><button id="level1" class="level active" aria-pressed="true">⭐ 1 – SLOVÍČKA</button><button id="level2" class="level" aria-pressed="false">⭐⭐ 2 – SPOJENÍ A VĚTY</button></div><p id="levelHelp" class="help">JEDNODUCHÁ SLOVÍČKA A OBRÁZKY</p><button id="positionStart" class="next hide" style="margin-bottom:16px">🧭 ZAČÍT HRU – KDE JE CO?</button><h2 id="topicsHeading">📚 LEKCE PODLE PRACOVNÍCH LISTŮ</h2><div id="topics" class="topics"></div><button id="rhymesButton" class="next" style="margin-top:16px;background:#e87b96">🎵 ŘÍKANKY A VĚTIČKY</button><details class="audioSettings"><summary>⚙️ NASTAVENÍ ZVUKU</summary><div class="soundSettings"><label class="toggle"><input id="slow" type="checkbox"> 🐢 POMALÝ POSLECH</label><label class="toggle"><input id="repeat" type="checkbox"> 🔁 PŘEHRÁT DVAKRÁT</label></div><label class="toggle"><input id="voice" type="checkbox" checked> 🔊 ZAPNOUT ZVUK</label></details><p class="help">👆 VYBER HRU A OBRÁZEK.</p></div></section>
-<section id="game" class="panel hide"><div class="gameTop"><button id="back" class="back" aria-label="ZPĚT">⬅️ ZPĚT</button><span id="count" class="pill">1 / 6</span><span id="stars" class="pill">⭐ 0</span></div><div class="progress"><div id="bar"></div></div><h2 id="heading"></h2><button id="instructions" class="instructionReplay">❔🔊 PRAVIDLA HRY</button><button id="listen" class="speaker"><span class="sound">🔊</span> KLEPNI A POSLOUCHEJ</button><div id="sceneCanvas" class="sceneCanvas hide"></div><div id="positionBoard" class="positionBoard hide"></div><div id="placementArea" class="hide"><div id="placementBoard" class="positionBoard placementBoard"></div><div id="placementChoices" class="placementChoices"></div></div><div id="choices" class="choices"></div><div id="spokenText" class="spokenText hide" aria-live="polite"><span class="spokenIcon">🔊</span><span id="spokenWords"></span></div><div id="message" class="message" aria-live="polite"></div><button id="next" class="next hide">➡️ DÁL</button></section>
-<section id="rhymes" class="panel hide"><div class="gameTop"><button id="rhymeBack" class="back">⬅️ ZPĚT</button><span class="pill">🎵 🔊</span></div><h2>🎵 ŘÍKANKY A VĚTIČKY</h2><p class="help">KLEPNI NA OBRÁZEK A POSLOUCHEJ</p><div id="rhymeList" class="rhymeList"></div></section><section id="finish" class="panel finish hide"><div class="medal">🏆</div><h2>SKVĚLÁ PRÁCE!</h2><p id="result"></p><div class="actions"><button id="retry" class="next">🔁 ZNOVU</button><button id="all" class="next">🏠 HRY</button></div></section><footer>UČENÍ NĚMČINY OBRÁZKY A ZVUKEM</footer></main>
-<script type="module" src="js/application.js"></script></body></html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#c5ecf4">
+  <title>NĚMČINA HROU</title>
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<main class="app">
+  <header class="hero">
+    <img class="landscape" data-art="landscape" alt="" fetchpriority="high">
+    <img class="mascot" data-art="dino" alt="">
+    <div class="sign"><h1>NĚMČINA HROU</h1><p>POSLOUCHEJ · KOUKEJ · HRAJ SI</p></div>
+  </header>
+  <section id="home" aria-label="HLAVNÍ MENU">
+    <section class="panel menuPanel" aria-labelledby="modesHeading">
+      <h2 id="modesHeading" class="tabTitle">VYBER SI HRU</h2>
+      <div class="modes" role="group" aria-labelledby="modesHeading">
+        <button class="mode active" data-mode="quiz" aria-pressed="true"><span class="modeArt pairArt"><img data-art="speaker" alt=""><img data-art="roter-apfel" alt=""></span><span>POSLOUCHEJ A UKAŽ</span></button>
+        <button class="mode" data-mode="explore" aria-pressed="false"><span class="modeArt"><img data-art="book" alt=""></span><span>PROHLÍŽEJ A POSLOUCHEJ</span></button>
+        <button class="mode" data-mode="memory" aria-pressed="false"><span class="modeArt"><img data-art="memory" alt=""></span><span>PEXESO</span></button>
+        <button class="mode" data-mode="scene" aria-pressed="false"><span class="modeArt"><img data-art="find" alt=""></span><span>NAJDI V OBRÁZKU</span></button>
+        <button class="mode" data-mode="position" aria-pressed="false"><span class="modeArt"><img data-art="directions" alt=""></span><span>KDE JE CO?</span></button>
+        <button class="mode" data-mode="placement" aria-pressed="false"><span class="modeArt"><img data-art="move" alt=""></span><span>KAM TO PATŘÍ?</span></button>
+      </div>
+    </section>
+    <section class="panel menuPanel" aria-labelledby="difficultyHeading">
+      <h2 id="difficultyHeading" class="tabTitle">VYBER SI OBTÍŽNOST</h2>
+      <div class="levels" role="group" aria-labelledby="difficultyHeading">
+        <button id="level1" class="level active" aria-pressed="true"><span class="levelStars"><img data-art="star" alt=""></span><span>1 – SLOVÍČKA</span></button>
+        <button id="level2" class="level" aria-pressed="false"><span class="levelStars"><img data-art="star" alt=""><img data-art="star" alt=""></span><span>2 – SPOJENÍ A VĚTY</span></button>
+      </div>
+      <p id="levelHelp" class="help">JEDNODUCHÁ SLOVÍČKA A OBRÁZKY</p>
+    </section>
+    <section id="lessonPanel" class="panel menuPanel" aria-labelledby="topicsHeading">
+      <h2 id="topicsHeading" class="tabTitle">VYBER SI LEKCI</h2><div id="topics" class="topics"></div>
+    </section>
+    <button id="positionStart" class="next start hide">ZAČÍT HRU</button>
+    <button id="rhymesButton" class="utility rhymeLink"><img data-art="rhymes" alt=""><span>ŘÍKANKY A VĚTIČKY</span><i class="chevron" aria-hidden="true"></i></button>
+    <details class="audioSettings"><summary><img data-art="sound" alt=""><span>NASTAVENÍ ZVUKU</span><i class="chevron" aria-hidden="true"></i></summary>
+      <div class="soundSettings">
+        <label><input id="voice" type="checkbox" checked> ZAPNOUT ZVUK</label>
+        <label><input id="slow" type="checkbox"> POMALÝ POSLECH</label>
+        <label><input id="repeat" type="checkbox"> PŘEHRÁT DVAKRÁT</label>
+      </div>
+    </details>
+  </section>
+  <section id="game" class="panel page hide" aria-labelledby="heading">
+    <div class="gameTop"><button id="back" class="back">ZPĚT</button><span id="count" class="pill" aria-label="POSTUP">1 / 6</span><span class="pill score"><img data-art="star" alt="HVĚZDY"><span id="stars">0</span></span></div>
+    <div class="progress" aria-hidden="true"><div id="bar"></div></div>
+    <h2 id="heading"></h2>
+    <div class="gameControls"><button id="listen" class="speaker"><img data-art="speaker" alt=""> POSLOUCHEJ</button><button id="instructions" class="instructionReplay">PRAVIDLA HRY</button></div>
+    <div id="sceneCanvas" class="sceneCanvas hide"></div>
+    <div id="positionBoard" class="positionBoard hide"></div>
+    <div id="placementArea" class="hide"><div id="placementBoard" class="positionBoard placementBoard"></div><div id="placementChoices" class="placementChoices"></div></div>
+    <div id="choices" class="choices"></div>
+    <div id="spokenText" class="spokenText hide" aria-live="polite" lang="de"><img data-art="speaker" alt=""><span id="spokenWords"></span></div>
+    <div id="message" class="message" aria-live="polite"></div><button id="next" class="next hide">DÁL</button>
+  </section>
+  <section id="rhymes" class="panel page hide" aria-labelledby="rhymeHeading">
+    <button id="rhymeBack" class="back">ZPĚT</button>
+    <div class="rhymeHeading"><img data-art="rhymes" alt=""><h2 id="rhymeHeading">ŘÍKANKY A VĚTIČKY</h2></div>
+    <p class="help">KLEPNI NA ŘÁDEK A POSLOUCHEJ</p><div id="rhymeList" class="rhymeList"></div>
+  </section>
+  <section id="finish" class="panel page finish hide" aria-labelledby="finishHeading">
+    <img class="trophy" data-art="trophy" alt=""><h2 id="finishHeading">SKVĚLÁ PRÁCE!</h2>
+    <p class="rewardScore"><img data-art="star" alt="HVĚZDY"><span id="result"></span></p>
+    <div class="actions"><button id="retry" class="next">ZNOVU</button><button id="all" class="back">ZPĚT NA HRY</button></div>
+  </section>
+</main>
+<script type="module" src="js/application.js"></script>
+</body>
+</html>
