@@ -57,7 +57,19 @@ for (const [width,height] of sizes) {
 }
 
 test('every active image decodes under the Pages base path', async ({ page }) => {
-  await openMenu(page);
+  // Mount the checked-in files at the same nested URL used by GitHub Pages.
+  const rootRequests = [];
+  page.on('request', req => {
+    const pathname = new URL(req.url()).pathname;
+    if (!pathname.startsWith('/nemcina-hrou/')) rootRequests.push(pathname);
+  });
+  await page.route('**/nemcina-hrou/**', async route => {
+    const url = new URL(route.request().url());
+    url.pathname = url.pathname.slice('/nemcina-hrou'.length);
+    await route.fulfill({response:await route.fetch({url:url.href})});
+  });
+  await page.goto('/nemcina-hrou/');
+  await expect(page.locator('.topic')).toHaveCount(12);
   const count = await page.evaluate(async () => {
     const [{availableImages},{interfaceFiles},{imageUrl}] = await Promise.all([
       import('./js/data/imageManifest.js'),import('./js/data/interfaceArt.js'),import('./js/classes/ImageRepository.js')]);
@@ -71,6 +83,7 @@ test('every active image decodes under the Pages base path', async ({ page }) =>
     return files.length;
   });
   expect(count).toBe(132);
+  expect(rootRequests).toEqual([]);
 });
 
 for (const level of [1,2]) {
@@ -129,7 +142,8 @@ test('picture-book review on iPhone 15', async ({page}, info) => {
     else await page.screenshot(options);
   };
   await capture('01-menu');
-  await capture('02-lekce', page.locator('#lessonPanel'));
+  await page.locator('#lessonPanel').evaluate(n => window.scrollTo(0, window.scrollY + n.getBoundingClientRect().top - 22));
+  await capture('02-lekce');
   await page.locator('summary').click();
   await capture('12-nastaveni', page.locator('details'));
   await page.locator('#voice').uncheck();
@@ -157,4 +171,81 @@ test('picture-book review on iPhone 15', async ({page}, info) => {
   await capture('10-odmena');
   await page.locator('#retry').click();
   await expect(page.locator('#count')).toHaveText('1 / 6');
+});
+
+// Advance the actual AudioManager callbacks one clip at a time. This makes the
+// highlight boundary observable without depending on an installed speaker.
+test('wrong answer never reveals the solution and stays marked through replay', async ({page}) => {
+  await page.addInitScript(() => {
+    window.reviewClips = [];
+    window.Audio = class {
+      constructor(src) { this.src = src; }
+      play() { window.reviewClips.push(this); return Promise.resolve(); }
+      pause() {}
+    };
+  });
+  await openMenu(page);
+  for (const mode of ['quiz','scene','position','placement']) {
+    await enter(page, mode);
+    const {rightSelector,wrongSelector,target,selected,task,feedback} = await page.evaluate(async mode => {
+      const a = await import('./js/application.js');
+      let rightSelector, wrongSelector, target, selected;
+      if (mode === 'quiz' || mode === 'scene') {
+        const choices = mode === 'quiz' ? '#choices button' : '#sceneCanvas button';
+        const prefix = mode === 'quiz' ? 'OBRÁZEK ' : 'NAJÍT ';
+        const nodes = [...document.querySelectorAll(choices)];
+        const task = a.currentTaskSpeech();
+        const wrong = nodes.find(n => n.getAttribute('aria-label') !== prefix + task);
+        selected = wrong.getAttribute('aria-label').slice(prefix.length);
+        wrongSelector = choices + '[aria-label="' + prefix + selected + '"]';
+        rightSelector = choices + '[aria-label="' + prefix + task + '"]';
+      } else if (mode === 'position') {
+        const q = a.positionGame.positionRound[0];
+        const right = a.positionDirections.findIndex(d => d.id === q.dir);
+        const wrong = right === 0 ? 1 : 0;
+        selected = a.positionDirections[wrong].id;
+        wrongSelector = '#positionBoard button:nth-child(' + (wrong+1) + ')';
+        rightSelector = '#positionBoard button:nth-child(' + (right+1) + ')';
+      } else {
+        const q = a.placementGame.placementRound[0];
+        target = '.placementItem[data-object="' + q.object + '"]';
+        selected = q.dir === 'oben' ? 'links' : 'oben';
+        wrongSelector = '.placementTarget[data-dir="' + selected + '"]';
+        rightSelector = '.placementTarget[data-dir="' + q.dir + '"]';
+      }
+      return {rightSelector,wrongSelector,target,selected:a.audioFile(selected),
+        task:a.audioFile(a.currentTaskSpeech()),feedback:a.feedbackMessages.wrong.map(f => a.audioFile(f.feedback))};
+    },mode);
+    if (target) await page.locator(target).click();
+    await page.locator(wrongSelector).click();
+    for (const expected of [[selected],feedback,['audio/Falsch_21.mp3'],[task]]) {
+      expect(expected).toContain(await page.evaluate(() => window.reviewClips.at(-1).src));
+      await expect(page.locator(wrongSelector)).toHaveClass(/wrong/);
+      await expect(page.locator(rightSelector)).not.toHaveClass(/correct/);
+      await page.evaluate(() => window.reviewClips.at(-1).onended());
+    }
+    await expect(page.locator(wrongSelector)).not.toHaveClass(/wrong/);
+    await page.locator(rightSelector).click();
+    await expect(page.locator('#stars')).toHaveText('1');
+    await page.locator('#back').click();
+  }
+});
+
+test('memory mismatch resets both cards and all four pairs lead to the reward', async ({page}) => {
+  await openMenu(page);
+  await mute(page);
+  await enter(page,'memory');
+  const ids = await page.evaluate(async () => (await import('./js/application.js')).memoryGame.memoryCards.map(c => c.id));
+  const cards = page.locator('.memory .choice');
+  const a = ids.indexOf(0), b = ids.indexOf(1);
+  await cards.nth(a).click(); await cards.nth(b).click();
+  await expect(page.locator('.memory .wrong')).toHaveCount(2);
+  await expect(page.locator('.memory .faceDown')).toHaveCount(8,{timeout:5000});
+  for (const id of [0,1,2,3]) {
+    await cards.nth(ids.indexOf(id)).click();
+    await cards.nth(ids.lastIndexOf(id)).click();
+    await expect(page.locator('#stars')).toHaveText(String(id+1));
+  }
+  await page.locator('#next').click();
+  await expect(page.locator('#result')).toHaveText('4 / 4');
 });
