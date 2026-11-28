@@ -13,7 +13,7 @@ klettern:'<path d="M12 90 V12 H88 V90 M12 32 H88 M12 52 H88 M12 72 H88 M36 12 V9
 export function learningMarkup(key){
  if(typeof key!=='string')return null;
  const [kind,value,color]=key.split(':');let body='';
- if(kind==='number'&&/^([0-9]|1[0-2])$/.test(value)){const fill=colors.find(c=>c.de===color)?.hex||'#5865d8';body='<text x="50" y="77" text-anchor="middle" font-family="Arial,sans-serif" font-size="'+(value.length===2?65:88)+'" font-weight="bold" fill="'+fill+'" stroke="#30394b" stroke-width="1.4" paint-order="stroke">'+value+'</text>'}
+ if(kind==='number'&&/^([0-9]|1[0-2])$/.test(value)){const fill=colors.find(c=>c.de===color)?.hex||'#5865d8';body='<text x="50" y="77" text-anchor="middle" font-family="Arial,sans-serif" font-size="80" font-weight="bold" fill="'+fill+'" stroke="#30394b" stroke-width="1.4" paint-order="stroke">'+value+'</text>'}
  else if(kind==='color'){const c=colors.find(c=>c.de===value);if(c)body='<circle cx="50" cy="50" r="37" fill="'+c.hex+'" stroke="#30394b" stroke-width="2"/>'}
  else if(kind==='activity')body=arts[value]||'';
  return body?'<svg class="learningArt" viewBox="0 0 100 100" role="img" aria-hidden="true">'+body+'</svg>':null;
