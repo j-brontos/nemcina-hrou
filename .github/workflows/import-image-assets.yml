@@ -1,0 +1,43 @@
+name: Import static image assets
+on:
+  push:
+    branches: [feature/image-assets-import-v11]
+    paths: ['.github/workflows/import-image-assets.yml']
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python -m pip install Pillow
+      - name: Validate and extract
+        run: |
+          python - <<'PY'
+          import zipfile, pathlib, io
+          from PIL import Image
+          with zipfile.ZipFile('nemcina-assets-v11.zip') as z:
+              assert z.testzip() is None
+              entries = [n for n in z.namelist() if n.lower().endswith('.webp') and not n.startswith('__MACOSX/')]
+              assert len(entries) == 120, len(entries)
+              names = [pathlib.PurePosixPath(n).name for n in entries]
+              assert len(set(names)) == 120
+              for n, name in zip(entries, names):
+                  data = z.read(n)
+                  with Image.open(io.BytesIO(data)) as im:
+                      assert im.format == 'WEBP'
+                      im.load()
+                  target = pathlib.Path('assets/images') / name
+                  assert not target.exists(), target
+                  target.parent.mkdir(parents=True, exist_ok=True)
+                  target.write_bytes(data)
+          PY
+      - name: Commit assets only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/images
+          git rm nemcina-assets-v11.zip
+          git rm .github/workflows/import-image-assets.yml
+          git commit -m "Import 120 validated static WebP assets"
+          git push origin HEAD:feature/image-assets-import-v11
