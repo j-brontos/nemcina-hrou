@@ -149,6 +149,12 @@ export const imageManifest = Object.freeze({
   "der teddy ist rechts": "kleiner-teddy",
   "der kleine teddy ist rechts": "kleiner-teddy",
   "die kastanie ist links": "braune-kastanie",
-  "die braune kastanie ist links": "braune-kastanie"
+  "die braune kastanie ist links": "braune-kastanie",
+  "der opa": "opa",
+  "der lehrer": "lehrer",
+  "die lehrerin": "lehrerin",
+  "der arzt": "arzt",
+  "der polizist": "polizist",
+  "der feuerwehrmann": "feuerwehrmann"
 });
 export const availableImages = Object.freeze({});
