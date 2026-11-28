@@ -18,7 +18,7 @@ const { stopAudio, speak, playWrong, giveFeedback, accessibleWord, paintPicture,
  const area=el("sceneCanvas");area.classList.toggle("level2",state.difficulty===2);
  if(rebuild){
   area.replaceChildren();const layout=sceneLayouts[state.topicIndex]||sceneLayouts[0];area.dataset.theme=layout.theme;
-  layout.decor.forEach(([emoji,x,y,size])=>{const span=document.createElement("span");span.className="sceneDecor";span.textContent=emoji;span.style.left=x+"%";span.style.top=y+"%";span.style.fontSize=size+"px";span.style.transform="translate(-50%,-50%)";area.appendChild(span)});
+  layout.decor.forEach(([emoji,x,y,size])=>{const span=document.createElement("span");span.className="sceneDecor";const names={"🌳":"der Baum","☀️":"die Sonne","☁️":"die Wolke","🍎":"der Apfel","🍄":"der Pilz","🦋":"der Schmetterling","🏠":"das Haus","🐦":"der Vogel","🌧️":"der Regen"};if(names[emoji])paintPicture(span,[names[emoji],emoji]);else span.textContent=emoji;span.style.left=x+"%";span.style.top=y+"%";span.style.fontSize=size+"px";span.style.transform="translate(-50%,-50%)";area.appendChild(span)});
   const spots=shuffled(layout.spots).slice(0,this.sceneItems.length);
   this.sceneItems.forEach((w,i)=>{const [x,y]=spots[i];const b=document.createElement("button");b.className="sceneItem";paintPicture(b,w);b.style.left=x+"%";b.style.top=y+"%";b.style.setProperty("--w","19%");b.style.setProperty("--h","21%");b.setAttribute("aria-label","NAJÍT "+accessibleWord(w));b.addEventListener("click",()=>chooseScene(b,w));area.appendChild(b)});
   const hint=document.createElement("div");hint.className="sceneHint";hint.textContent="👆 NAJDI SPRÁVNÝ OBRÁZEK";area.appendChild(hint)

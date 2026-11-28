@@ -1,7 +1,8 @@
+import { ImageRepository } from "./ImageRepository.js";
 import { learningMarkup } from "../data/learningArt.js";
 
 export class PictureRenderer {
-constructor(context){this.context=context;}
+constructor(context){this.context=context;this.images=new ImageRepository();}
 
 
 soccerBallMarkup(){
@@ -21,6 +22,7 @@ return this.pictureMarkup([object.adjective+" "+object.noun,object.icon])}
 pictureMarkup(word){
 const { soccerBallMarkup, isFootball, accessibleWord, placementPicture, pictureMarkup, paintPicture, state } = this.context;
 
+ const image=this.images.markup(word);if(image)return image;
  const text=word[0].toLocaleLowerCase("de-DE"),emoji=word[1];
  const palette={rote:"#e64545",roten:"#e64545",braune:"#9b6235",schwarze:"#202638",gelbe:"#f2c831",grüne:"#47a963",grünen:"#47a963",blaue:"#3979d9",blauen:"#3979d9",bunten:"#e96736",schwarzen:"#202638",gelben:"#f2c831",braunen:"#9b6235"};
  const color=Object.entries(palette).find(([key])=>text.includes(key))?.[1];
@@ -62,5 +64,5 @@ const { soccerBallMarkup, isFootball, accessibleWord, placementPicture, pictureM
 }
 paintPicture(button,word){
 const { soccerBallMarkup, isFootball, accessibleWord, placementPicture, pictureMarkup, paintPicture, state } = this.context;
-const art=learningMarkup(word[1]);if(art){button.innerHTML=art;return}if(isFootball(word))button.innerHTML=soccerBallMarkup();else button.innerHTML=pictureMarkup(word)}
+const image=this.images.markup(word);if(image){button.innerHTML=image;return}const art=learningMarkup(word[1]);if(art){button.innerHTML=art;return}if(isFootball(word))button.innerHTML=soccerBallMarkup();else button.innerHTML=pictureMarkup(word)}
 }
