@@ -1,4 +1,3 @@
-// Canonical image IDs; files are supplied separately.
 export const imageManifest = Object.freeze({
   "rot": "rot",
   "blau": "blau",
@@ -81,7 +80,7 @@ export const imageManifest = Object.freeze({
   "der rote pilz": "rote-pilz",
   "der bunte drachen": "bunte-drachen",
   "der rote apfel": "rote-apfel",
-  "die gelbe banane": "gelbe-banane",
+  "die gelbe banane": "banane",
   "die grüne birne": "gruene-birne",
   "die roten kirschen": "roten-kirschen",
   "die süße orange": "suesse-orange",
@@ -94,7 +93,7 @@ export const imageManifest = Object.freeze({
   "die heiße pizza": "heisse-pizza",
   "der bunte schmetterling": "bunte-schmetterling",
   "die kleine biene": "kleine-biene",
-  "der rote marienkäfer": "rote-marienkaefer",
+  "der rote marienkäfer": "marienkaefer",
   "die lange raupe": "lange-raupe",
   "die fleißige ameise": "fleissige-ameise",
   "das kleine mädchen": "kleine-maedchen",
@@ -137,7 +136,26 @@ export const imageManifest = Object.freeze({
   "blaue buch": "blaues-buch",
   "kleine katze": "kleine-katze",
   "grünen baum": "gruener-baum",
-  "der fussball": "fussball"
+  "der fussball": "fussball",
+  "der apfel ist oben": "roter-apfel",
+  "der rote apfel ist oben": "roter-apfel",
+  "der hut ist unten": "schwarzer-hut",
+  "der schwarze hut ist unten": "schwarzer-hut",
+  "die katze ist links": "kleine-katze",
+  "die kleine katze ist links": "kleine-katze",
+  "die sonne ist rechts": "sonne",
+  "die gelbe sonne ist rechts": "sonne",
+  "der baum ist in der mitte": "gruener-baum",
+  "der grüne baum ist in der mitte": "gruener-baum",
+  "der pilz ist unten": "roter-pilz",
+  "der rote pilz ist unten": "roter-pilz",
+  "der schmetterling ist oben": "bunter-schmetterling",
+  "der bunte schmetterling ist oben": "bunter-schmetterling",
+  "das buch ist in der mitte": "blaues-buch",
+  "das blaue buch ist in der mitte": "blaues-buch",
+  "der teddy ist rechts": "kleiner-teddy",
+  "der kleine teddy ist rechts": "kleiner-teddy",
+  "die kastanie ist links": "braune-kastanie",
+  "die braune kastanie ist links": "braune-kastanie"
 });
-// Only verified, committed image files belong in this registry.
 export const availableImages = Object.freeze({});
