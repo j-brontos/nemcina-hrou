@@ -112,11 +112,12 @@ for (const level of [1,2]) {
   });
 }
 
-test('place an item by tapping and by dragging', async ({page}, info) => {
+test('place an item by tapping and by dragging', async ({page,browserName}, info) => {
   await openMenu(page);
   await mute(page);
   await enter(page, 'placement');
-  for (const action of ['tap','drag']) {
+  const actions = browserName === 'chromium' ? ['tap','drag','touch-drag'] : ['tap','drag'];
+  for (const action of actions) {
     const q = await page.evaluate(async () => {
       const {placementGame:g} = await import('./js/application.js');
       return g.placementRound[g.placementStep];
@@ -126,8 +127,24 @@ test('place an item by tapping and by dragging', async ({page}, info) => {
     if (action === 'tap') {
       if (info.project.use.hasTouch) { await item.tap(); await target.tap(); }
       else { await item.click(); await target.click(); }
-    } else {
+    } else if (action === 'drag') {
       await item.dragTo(target);
+    } else {
+      await page.setViewportSize({width:393,height:852});
+      await item.scrollIntoViewIfNeeded();
+      const finger = await page.context().newCDPSession(page);
+      await finger.send('Emulation.setTouchEmulationEnabled',{enabled:true});
+      const from = await item.boundingBox(), to = await target.boundingBox();
+      const x = from.x + from.width/2, y = from.y + from.height/2;
+      const dx = to.x + to.width/2 - x, dy = to.y + to.height/2 - y;
+      await finger.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{x,y}]});
+      for (let i=1;i<=6;i++) {
+        await finger.send('Input.dispatchTouchEvent',{
+          type:'touchMove',touchPoints:[{x:x+dx*i/6,y:y+dy*i/6}]
+        });
+      }
+      await finger.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+      await finger.detach();
     }
     await expect(target).toHaveClass(/correct/);
     await expect(target.locator('img')).toHaveAttribute('src',await item.locator('img').getAttribute('src'));
@@ -182,7 +199,7 @@ test('picture-book review on iPhone 15', async ({page}, info) => {
 
 // Advance the actual AudioManager callbacks one clip at a time. This makes the
 // highlight boundary observable without depending on an installed speaker.
-test('wrong answer never reveals the solution and stays marked through replay', async ({page}) => {
+test('wrong answer never reveals the solution and stays marked through replay', async ({page}, info) => {
   await page.addInitScript(() => {
     window.reviewClips = [];
     window.Audio = class {
@@ -229,6 +246,12 @@ test('wrong answer never reveals the solution and stays marked through replay', 
       expect(expected).toContain(await page.evaluate(() => window.reviewClips.at(-1).src));
       await expect(page.locator(wrongSelector)).toHaveClass(/wrong/);
       await expect(page.locator(rightSelector)).not.toHaveClass(/correct/);
+      if (mode === 'quiz' && expected.includes(task) && info.project.name === 'webkit-mobile') {
+        const dir = path.resolve('test-results','iphone15-review');
+        fs.mkdirSync(dir,{recursive:true});
+        await picturesReady(page);
+        await page.screenshot({path:path.join(dir,'11-chybna-odpoved.png'),scale:'css'});
+      }
       await page.evaluate(() => window.reviewClips.at(-1).onended());
     }
     await expect(page.locator(wrongSelector)).not.toHaveClass(/wrong/);

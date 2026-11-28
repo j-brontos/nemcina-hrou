@@ -31,7 +31,7 @@ Původní sada obsahuje 116 průhledných ilustrací o velikosti 512 × 512 a č
 
 Předchozí validátor procházel 98 souborů z původních 120. Registr nyní zahrnuje i zbývajících 22 schválených souborů. K dispozici jsou také rezervní ilustrace pro další lekce. Všechny nové obrázky rozhraní definuje `js/data/interfaceArt.js`.
 
-Z vykreslování slovní zásoby zmizely generátory SVG pro fotbalový míč, listy, stromy, ovoce, zvířata, oblečení, počasí a další jednotlivé předměty. Sedm ručně kreslených SVG činností nahradily příslušné statické obrázky. Obrázky v odpovědích, pexesu, scénách a směrových hrách se už neskládají ze systémových emoji. Starší datové dvojice mohou stále obsahovat historický symbol. Jejich vzhled určuje centrální záznam, číslo nebo název barvy.
+Z vykreslování slovní zásoby zmizely generátory SVG pro fotbalový míč, listy, stromy, ovoce, zvířata, oblečení, počasí a další jednotlivé předměty. Sedm ručně kreslených SVG činností nahradily příslušné statické obrázky. Obrázky v odpovědích, pexesu, scénách a směrových hrách se už neskládají ze systémových emoji. Starší datové dvojice mohou stále obsahovat historický symbol. Jejich vzhled určuje centrální záznam, číslo nebo název barvy. Samotný původní zvukový modul používá symboly reproduktoru ve své nouzové hlášce při nedostupnosti MP3 i hlasové syntézy.
 
 Původní CSS obsahovalo samostatné výjimky pro `.singleEmoji`, `.footballArt`, `.sceneDecor`, `.spokenIcon` a `.medal`. Jejich vykreslování přebírají sdílené styly učebních obrázků, statická scéna, reproduktor a pohár. Výběr obrázku a pravidla barevné zpětné vazby zůstávají společné pro všechny lekce.
 
