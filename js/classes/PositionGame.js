@@ -20,7 +20,7 @@ const { stopAudio, speak, playWrong, giveFeedback, startPosition, renderPosition
  el("heading").textContent="🧭 KDE JE CO?";
  el("count").textContent=(this.positionStep+1)+" / "+this.positionRound.length;el("stars").textContent="⭐ "+this.positionScore;el("bar").style.width=this.positionStep/this.positionRound.length*100+"%";el("message").textContent="👂 POSLOUCHEJ A UKAŽ";el("next").classList.add("hide");
  const area=el("positionBoard");area.replaceChildren();
- positionDirections.forEach((d,i)=>{const b=document.createElement("button");b.className="positionCell";b.textContent=positionObjects[question.object].icon;b.setAttribute("aria-label",d.label+" – "+positionObjects[question.object].name);b.addEventListener("click",()=>choosePosition(b,d));area.appendChild(b)});
+ positionDirections.forEach((d,i)=>{const b=document.createElement("button");b.className="positionCell";this.context.paintPicture(b,[state.difficulty===2?question.sentence:question.speech,positionObjects[question.object].icon]);b.setAttribute("aria-label",d.label+" – "+positionObjects[question.object].name);b.addEventListener("click",()=>choosePosition(b,d));area.appendChild(b)});
  speak(positionSpeech());
 }
 positionSpeech(){
