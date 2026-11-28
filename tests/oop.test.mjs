@@ -28,11 +28,17 @@ function feedbackFixture(voice){
  return {context,audio,feedback,events,classes,highlight};
 }
 test('muted feedback repeats task and clears highlight',()=>{const f=feedbackFixture(false);f.feedback.playWrong('wrong word',{highlight:f.highlight});assert.ok(f.events.includes('task'));assert.equal(f.classes.has('wrong'),false)});
-test('audible feedback retains highlight until repeated task ends',()=>{const old=globalThis.Audio;const played=[];globalThis.Audio=class{constructor(src){played.push(src)}play(){return Promise.resolve()}pause(){}};try{const f=feedbackFixture(true);f.feedback.playWrong('rot',{highlight:f.highlight});assert.equal(f.classes.has('wrong'),true);f.audio.audioPlayer.onended();f.audio.audioPlayer.onended();f.audio.audioPlayer.onended();assert.equal(f.classes.has('wrong'),true);f.audio.audioPlayer.onended();assert.equal(f.classes.has('wrong'),false);assert.deepEqual(played,['audio/Falsch_21.mp3','audio/rot.mp3','audio/try_20again.mp3','audio/task.mp3'])}finally{globalThis.Audio=old}});
+test('audible feedback retains highlight until repeated task ends',()=>{const old=globalThis.Audio;const played=[];globalThis.Audio=class{constructor(src){played.push(src)}play(){return Promise.resolve()}pause(){}};try{const f=feedbackFixture(true);f.feedback.playWrong('rot',{highlight:f.highlight});assert.equal(f.classes.has('wrong'),true);f.audio.audioPlayer.onended();f.audio.audioPlayer.onended();f.audio.audioPlayer.onended();assert.equal(f.classes.has('wrong'),true);f.audio.audioPlayer.onended();assert.equal(f.classes.has('wrong'),false);assert.deepEqual(played,['audio/rot.mp3','audio/try_20again.mp3','audio/Falsch_21.mp3','audio/task.mp3'])}finally{globalThis.Audio=old}});
 
 test('long rhyme audio filenames remain within filesystem limits',()=>{const audio=new AudioManager({});const rhyme='Eins, zwei, drei, vier, fünf, sechs. '.repeat(20);const path=audio.audioFile(rhyme);assert.match(path,/^audio\/long-[0-9a-f]{16}\.mp3$/);assert.equal(path,audio.audioFile(rhyme));assert.notEqual(path,audio.audioFile(rhyme+'!'));assert.equal(audio.audioFile('der Fußball'),'audio/der_20Fu_C3_9Fball.mp3')});
 
 import {PictureRenderer} from '../js/classes/PictureRenderer.js';
-test('semantic illustrations retain color, plurality and compound symbols',()=>{const r=new PictureRenderer({});r.images.files={};const shoes=r.pictureMarkup(['die grünen Schuhe','👟🟢']);assert.equal((shoes.match(/<g transform/g)||[]).length,2);assert.match(shoes,/#47a963/);assert.match(r.pictureMarkup(['der blaue Schirm','☂️🔵']),/#3979d9/);const leaves=r.pictureMarkup(['die bunten Blätter','🍁🍂']);assert.equal((leaves.match(/<g transform/g)||[]).length,3);assert.match(r.pictureMarkup(['Guten Morgen, Dino!','🌅🦕']),/🦕/)});
+test('semantic variants use their own static illustrations', () => {
+ const r = new PictureRenderer();
+ for (const [plural, singular] of [['die grünen Schuhe', 'der Schuh'], ['die bunten Blätter', 'das Blatt'], ['der blaue Schirm', 'der Regenschirm'], ['Guten Morgen, Dino!', 'Guten Morgen!']]) {
+  assert.match(r.pictureMarkup([plural]), /<img .*\.webp/);
+  assert.notEqual(r.pictureMarkup([plural]), r.pictureMarkup([singular]));
+ }
+});
 
 test('static catalog preserves semantic variants and positions',()=>{const r=new PictureRenderer({});for(const [word,id] of [['die grünen Schuhe','gruenen-schuhe'],['der blaue Schirm','blaue-schirm'],['die bunten Blätter','bunten-blaetter'],['Guten Morgen, Dino!','guten-morgen-dino'],['Der Apfel ist unten.','roter-apfel'],['der Arzt','arzt']])assert.ok(r.pictureMarkup([word,'']).includes('/'+id+'.webp'),word)});

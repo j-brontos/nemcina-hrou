@@ -1,3 +1,4 @@
+import { loadInterfaceArt } from "./data/interfaceArt.js";
 import { colors, tuple, newTopics, newLevelTwo, newRhymes, vocabulary, numberSentences } from "./data/expandedVocabulary.js";
 import { ApplicationState } from "./classes/ApplicationState.js";
 import { AudioManager } from "./classes/AudioManager.js";
@@ -35,7 +36,6 @@ const clearWrongHighlight = feedbackManager.clearWrongHighlight.bind(feedbackMan
 const markWrongHighlight = feedbackManager.markWrongHighlight.bind(feedbackManager);
 const playWrong = feedbackManager.playWrong.bind(feedbackManager);
 const giveFeedback = feedbackManager.giveFeedback.bind(feedbackManager);
-const soccerBallMarkup = pictureRenderer.soccerBallMarkup.bind(pictureRenderer);
 const isFootball = pictureRenderer.isFootball.bind(pictureRenderer);
 const accessibleWord = pictureRenderer.accessibleWord.bind(pictureRenderer);
 const placementPicture = pictureRenderer.placementPicture.bind(pictureRenderer);
@@ -108,22 +108,6 @@ levelTwoItems.push(...newLevelTwo);
 const el=id=>document.getElementById(id);
 function shuffled(items){const a=[...items];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 const gameInstructions={
  placement:"Poslouchej a přesuň správný obrázek na správné místo.",
  quiz:"Poslouchej německé slovíčko a klepni na správný obrázek.",
@@ -134,40 +118,21 @@ const gameInstructions={
 };
 
 const feedbackMessages={
- correct:[{feedback:"Super!",label:"🌟 SUPER!"},{feedback:"Sehr gut!",label:"⭐ VÝBORNĚ!"},{feedback:"Prima gemacht!",label:"🎉 SKVĚLÁ PRÁCE!"},{feedback:"Richtig!",label:"✅ SPRÁVNĚ!"}],
- wrong:[{feedback:"Noch mal!",label:"💛 ZKUS TO ZNOVU!"},{feedback:"Nicht ganz!",label:"🌈 TO JEŠTĚ NENÍ ONO!"}]
+ correct:[{feedback:"Super!",label:"SUPER!"},{feedback:"Sehr gut!",label:"VÝBORNĚ!"},{feedback:"Prima gemacht!",label:"SKVĚLÁ PRÁCE!"},{feedback:"Richtig!",label:"SPRÁVNĚ!"}],
+ wrong:[{feedback:"Noch mal!",label:"ZKUS TO ZNOVU!"},{feedback:"Nicht ganz!",label:"TO JEŠTĚ NENÍ ONO!"}]
 };
 
-
-
-
-// Shared illustration for every football appearance, independent of difficulty.
-
-
-
-
-
-
-
-
-
-
-
-
-
 const sceneLayouts=[
- {theme:"colors",decor:[["☀️",80,10,54],["☁️",18,14,54],["🏡",76,49,108],["🌳",15,47,105],["🌼",45,82,35]],spots:[[28,30],[55,24],[43,54],[80,75],[19,77],[66,58],[53,83]]},
- {theme:"garden",decor:[["☀️",84,11,56],["☁️",20,15,64],["🌳",12,47,116],["🏡",79,54,115],["🌷",42,85,34]],spots:[[33,27],[55,22],[44,49],[24,72],[70,76],[59,57],[85,35]]},
- {theme:"autumn",decor:[["☁️",18,14,66],["🌳",82,44,120],["🍂",53,77,43],["🌾",13,80,53],["🏡",48,43,92]],spots:[[30,28],[63,20],[23,53],[71,59],[40,79],[81,80],[51,58]]},
- {theme:"garden",decor:[["☀️",84,11,56],["🌳",15,40,105],["🏡",77,45,103],["🌻",44,84,40],["🌿",9,81,50]],spots:[[31,29],[57,22],[44,52],[27,73],[71,76],[82,54],[52,84]]},
- {theme:"kitchen",decor:[["🪟",15,21,100],["🪴",78,29,73],["🪑",12,79,95],["🍽️",82,76,76]],spots:[[36,22],[59,24],[20,47],[47,49],[77,49],[32,78],[62,78]]},
- {theme:"garden",decor:[["☀️",80,10,52],["🌳",17,43,117],["🌼",81,81,42],["🌿",12,81,45]],spots:[[39,25],[64,26],[23,58],[52,52],[78,58],[38,81],[65,82]]},
- {theme:"people",decor:[["🪟",16,18,96],["🪴",83,22,74],["🛋️",51,77,130]],spots:[[25,31],[50,26],[76,31],[21,62],[52,55],[78,64],[45,84]]},
- {theme:"garden",decor:[["🌳",12,45,110],["☀️",85,11,58],["🏡",76,48,105],["🌷",42,81,37]],spots:[[30,29],[57,23],[42,52],[24,74],[72,77],[83,57],[55,83]]},
- {theme:"people",decor:[["🪟",14,20,105],["🪴",82,24,74],["🛋️",53,79,125]],spots:[[33,27],[63,24],[21,52],[48,51],[76,53],[32,77],[66,79]]}
+ {theme:"colors",spots:[[28,30],[55,24],[43,54],[80,75],[19,77],[66,58],[53,83]]},
+ {theme:"garden",spots:[[33,27],[55,22],[44,49],[24,72],[70,76],[59,57],[85,35]]},
+ {theme:"autumn",spots:[[30,28],[63,20],[23,53],[71,59],[40,79],[81,80],[51,58]]},
+ {theme:"garden",spots:[[31,29],[57,22],[44,52],[27,73],[71,76],[82,54],[52,84]]},
+ {theme:"kitchen",spots:[[36,22],[59,24],[20,47],[47,49],[77,49],[32,78],[62,78]]},
+ {theme:"garden",spots:[[39,25],[64,26],[23,58],[52,52],[78,58],[38,81],[65,82]]},
+ {theme:"people",spots:[[25,31],[50,26],[76,31],[21,62],[52,55],[78,64],[45,84]]},
+ {theme:"garden",spots:[[30,29],[57,23],[42,52],[24,74],[72,77],[83,57],[55,83]]},
+ {theme:"people",spots:[[33,27],[63,24],[21,52],[48,51],[76,53],[32,77],[66,79]]}
 ];
-
-
 
 const positionDirections=[
  {id:"oben",label:"NAHOŘE"},{id:"links",label:"VLEVO"},{id:"mitte",label:"UPROSTŘED"},{id:"rechts",label:"VPRAVO"},{id:"unten",label:"DOLE"}
@@ -189,10 +154,6 @@ const positionQuestions=[
  {dir:"links",object:9,speech:"Die Kastanie ist links.",sentence:"Die braune Kastanie ist links."}
 ];
 
-
-
-
-
 // Placement is intentionally a separate mode: four objects, five spatial targets.
 const placementObjects=[
  {icon:"🍎",noun:"Apfel",article:"den",adjective:"roten"},
@@ -206,28 +167,9 @@ const placementObjects=[
 ];
 const placementPhrases={oben:"nach oben",unten:"nach unten",links:"nach links",rechts:"nach rechts",mitte:"in die Mitte"};
 
-
-
-
-
-
-
-
-
-
-
-
-Object.assign(context,{audioManager,feedbackManager,pictureRenderer,vocabularyRepository,quizGame,exploreGame,memoryGame,sceneGame,positionGame,placementGame,application,stopAudio,audioFile,speak,playErrorTone,clearWrongHighlight,markWrongHighlight,playWrong,giveFeedback,soccerBallMarkup,isFootball,accessibleWord,placementPicture,pictureMarkup,paintPicture,itemsForTopic,render,choose,renderExplore,startMemory,flipCard,startScene,renderScene,chooseScene,nextScene,startPosition,renderPosition,positionSpeech,choosePosition,nextPosition,placementSpeech,startPlacement,renderPlacement,targetAt,selectPlacement,placeSelected,nextPlacement,cancelAdvance,scheduleAdvance,showWord,currentTaskSpeech,playInstructions,display,topicsUI,start,next,startPositionFromHome,setDifficulty,finishGame,showRhymes,topics,levelTwoItems,el,shuffled,gameInstructions,feedbackMessages,sceneLayouts,positionDirections,positionObjects,positionQuestions,placementObjects,placementPhrases,numberSentences,state});
+Object.assign(context,{audioManager,feedbackManager,pictureRenderer,vocabularyRepository,quizGame,exploreGame,memoryGame,sceneGame,positionGame,placementGame,application,stopAudio,audioFile,speak,playErrorTone,clearWrongHighlight,markWrongHighlight,playWrong,giveFeedback,isFootball,accessibleWord,placementPicture,pictureMarkup,paintPicture,itemsForTopic,render,choose,renderExplore,startMemory,flipCard,startScene,renderScene,chooseScene,nextScene,startPosition,renderPosition,positionSpeech,choosePosition,nextPosition,placementSpeech,startPlacement,renderPlacement,targetAt,selectPlacement,placeSelected,nextPlacement,cancelAdvance,scheduleAdvance,showWord,currentTaskSpeech,playInstructions,display,topicsUI,start,next,startPositionFromHome,setDifficulty,finishGame,showRhymes,topics,levelTwoItems,el,shuffled,gameInstructions,feedbackMessages,sceneLayouts,positionDirections,positionObjects,positionQuestions,placementObjects,placementPhrases,numberSentences,state});
 Object.defineProperty(context,'rhymes',{get:()=>rhymes});
-el("positionStart").addEventListener("click",()=>startPositionFromHome());
-
-
-el("instructions").addEventListener("click",playInstructions);
-el("level1").addEventListener("click",()=>setDifficulty(1));
-el("level2").addEventListener("click",()=>setDifficulty(2));
-document.querySelectorAll(".mode").forEach(b=>b.addEventListener("click",()=>{state.mode=b.dataset.mode;stopAudio();playInstructions();const positions=state.mode==="position"||state.mode==="placement";el("positionStart").classList.toggle("hide",!positions);el("topics").classList.toggle("hide",positions);el("topicsHeading").classList.toggle("hide",positions);document.querySelectorAll(".mode").forEach(x=>x.classList.toggle("active",x===b));el("home").querySelector(".help").textContent=state.mode==="placement"?"PŘESUŇ OBRÁZEK NA SPRÁVNÉ MÍSTO.":state.mode==="position"?"POSLOUCHEJ A UKAŽ, KDE JE JABLKO, KLOBOUK NEBO ZVÍŘÁTKO.":state.mode==="memory"?"OTÁČEJ KARTY A NAJDI STEJNÉ OBRÁZKY.":state.mode==="explore"?"KLEPNI NA OBRÁZEK A POSLOUCHEJ NĚMECKÉ SLOVO.":"VYBER HRU, KLEPNI NA 🔊 A PAK NA SPRÁVNÝ OBRÁZEK."}));
-
-el("listen").addEventListener("click",()=>{clearTimeout(state.wrongAnswerWatchdog);state.wrongAnswerWatchdog=null;state.audioBusy=false;placementGame.placementLocked=false;el("message").textContent="";speak(state.mode==="placement"?placementSpeech():state.mode==="position"?positionSpeech():state.mode==="scene"?sceneGame.sceneItems[sceneGame.sceneStep][0]:state.round[state.step][0])});el("next").addEventListener("click",next);el("back").addEventListener("click",()=>{stopAudio();display("home")});el("retry").addEventListener("click",()=>start(state.topicIndex));el("all").addEventListener("click",()=>{stopAudio();display("home")});const rhymes=[
+const rhymes=[
  {icon:"🌈",title:"REGENBOGEN",lines:["REGEN, REGEN, KOMM HERBEI,","SONNE SCHEINT, DER HIMMEL FREI.","ROT UND GELB UND GRÜN UND BLAU,","EIN REGENBOGEN – SCHAU, SCHAU, SCHAU!"],speech:"Regen, Regen, komm herbei. Sonne scheint, der Himmel frei. Rot und gelb und grün und blau. Ein Regenbogen, schau, schau, schau!"},
  {icon:"🍂",title:"BUNTE BLÄTTER",lines:["BUNTE BLÄTTER, ROT UND GELB,","FLIEGEN LEISE DURCH DIE WELT.","EINS, ZWEI, DREI – SCHAU MAL HER,","DER WIND BLÄST SIE HIN UND HER!"],speech:"Bunte Blätter, rot und gelb. Fliegen leise durch die Welt. Eins, zwei, drei, schau mal her. Der Wind bläst sie hin und her!"},
  {icon:"☔",title:"REGENSCHIRM",lines:["ES REGNET, ES REGNET,","ICH NEHME MEINEN SCHIRM.","ICH NEHME MEINE GUMMISTIEFEL,","UND SPRINGE IN DIE PFÜTZEN!"],speech:"Es regnet, es regnet. Ich nehme meinen Schirm. Ich nehme meine Gummistiefel. Und springe in die Pfützen!"},
@@ -235,8 +177,42 @@ el("listen").addEventListener("click",()=>{clearTimeout(state.wrongAnswerWatchdo
 ];
 
 rhymes.push(...newRhymes);
-el("rhymesButton").addEventListener("click",showRhymes);
-el("rhymeBack").addEventListener("click",()=>{stopAudio();display("home")});
-topicsUI();
+function bindControls() {
+  loadInterfaceArt();
+  el("positionStart").addEventListener("click", startPositionFromHome);
+  el("instructions").addEventListener("click", playInstructions);
+  for (const level of [1, 2]) el("level" + level).addEventListener("click", () => setDifficulty(level));
+  const modes = document.querySelectorAll(".mode");
+  for (const button of modes) {
+    button.addEventListener("click", () => {
+      state.mode = button.dataset.mode;
+      stopAudio();
+      playInstructions();
+      const spatial = ["position", "placement"].includes(state.mode);
+      el("positionStart").classList.toggle("hide", !spatial);
+      el("positionStart").textContent = state.mode === "placement" ? "ZAČÍT HRU – KAM TO PATŘÍ?" : "ZAČÍT HRU – KDE JE CO?";
+      el("lessonPanel").classList.toggle("hide", spatial);
+      for (const other of modes) {
+        other.classList.toggle("active", other === button);
+        other.setAttribute("aria-pressed", String(other === button));
+      }
+    });
+  }
+  el("listen").addEventListener("click", () => {
+    clearTimeout(state.wrongAnswerWatchdog);
+    state.wrongAnswerWatchdog = null;
+    state.audioBusy = false;
+    placementGame.placementLocked = false;
+    el("message").textContent = "";
+    speak(currentTaskSpeech(), {onEnd: clearWrongHighlight});
+  });
+  el("next").addEventListener("click", next);
+  for (const id of ["back", "all", "rhymeBack"]) el(id).addEventListener("click", () => display("home"));
+  el("retry").addEventListener("click", () => start(state.topicIndex));
+  el("rhymesButton").addEventListener("click", showRhymes);
+  topicsUI();
+}
 
-export { vocabulary, numberSentences, audioManager, feedbackManager, pictureRenderer, vocabularyRepository, quizGame, exploreGame, memoryGame, sceneGame, positionGame, placementGame, application, stopAudio, audioFile, speak, playErrorTone, clearWrongHighlight, markWrongHighlight, playWrong, giveFeedback, soccerBallMarkup, isFootball, accessibleWord, placementPicture, pictureMarkup, paintPicture, itemsForTopic, render, choose, renderExplore, startMemory, flipCard, startScene, renderScene, chooseScene, nextScene, startPosition, renderPosition, positionSpeech, choosePosition, nextPosition, placementSpeech, startPlacement, renderPlacement, targetAt, selectPlacement, placeSelected, nextPlacement, cancelAdvance, scheduleAdvance, showWord, currentTaskSpeech, playInstructions, display, topicsUI, start, next, startPositionFromHome, setDifficulty, finishGame, showRhymes, topics, levelTwoItems, el, shuffled, gameInstructions, feedbackMessages, sceneLayouts, positionDirections, positionObjects, positionQuestions, placementObjects, placementPhrases, rhymes };
+if (typeof document !== "undefined") bindControls();
+
+export { vocabulary, numberSentences, audioManager, feedbackManager, pictureRenderer, vocabularyRepository, quizGame, exploreGame, memoryGame, sceneGame, positionGame, placementGame, application, stopAudio, audioFile, speak, playErrorTone, clearWrongHighlight, markWrongHighlight, playWrong, giveFeedback,  isFootball, accessibleWord, placementPicture, pictureMarkup, paintPicture, itemsForTopic, render, choose, renderExplore, startMemory, flipCard, startScene, renderScene, chooseScene, nextScene, startPosition, renderPosition, positionSpeech, choosePosition, nextPosition, placementSpeech, startPlacement, renderPlacement, targetAt, selectPlacement, placeSelected, nextPlacement, cancelAdvance, scheduleAdvance, showWord, currentTaskSpeech, playInstructions, display, topicsUI, start, next, startPositionFromHome, setDifficulty, finishGame, showRhymes, topics, levelTwoItems, el, shuffled, gameInstructions, feedbackMessages, sceneLayouts, positionDirections, positionObjects, positionQuestions, placementObjects, placementPhrases, rhymes };

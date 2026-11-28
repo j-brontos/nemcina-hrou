@@ -8,3 +8,18 @@ test('activities reuse distinct illustrations',()=>{assert.equal(new Set(activit
 test('rhymes preserve line counts and full text',()=>{assert.deepEqual(newRhymes.map(r=>r.lines.length),[8,6,8]);for(const r of newRhymes)assert.equal(r.speech,r.lines.join(' '))});
 
 test('all numbers use identical font size and alignment',()=>{for(const n of numbers)for(const key of [n.art,coloredNumber(n.value,'rot').art]){const svg=learningMarkup(key);assert.match(svg,/font-size="80"/);assert.match(svg,/x="50" y="77" text-anchor="middle"/)}});
+
+import { PictureRenderer } from '../js/classes/PictureRenderer.js';
+test('original colour tuples, fruit and activities use their intended art', () => {
+ const renderer = new PictureRenderer();
+ assert.match(renderer.pictureMarkup(['orange', 'color:orange']), /<circle .*fill="#ef8b32"/);
+ assert.match(renderer.pictureMarkup(['die Orange', '🍊']), /\/orange\.webp/);
+ assert.match(renderer.pictureMarkup(['rot', '🔴']), /<circle .*fill="#e64545"/);
+ for (const [index, activity] of activities.entries()) {
+  const art = renderer.pictureMarkup([activity.de, activity.art]);
+  assert.match(art, /<img .*\/activity-[a-z]+\.webp/);
+  for (const entry of [favorites[index], questions[index]]) {
+   assert.equal(renderer.pictureMarkup([entry.de, entry.art]), art);
+  }
+ }
+});
